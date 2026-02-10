@@ -240,7 +240,7 @@ function scheduleDailyReport(bot) {
 }
 
   scheduleDailyReport(bot);
-  
+
   setInterval(() => {
   logStats("AUTO");
 }, 5 * 60 * 1000);

@@ -36,14 +36,15 @@ export const page2 = {
     {
       key: "iban",
       type: "text",
-      required: true,
+      required: false,
       translate: false,
       dependsOn: { key: "has_bank_account", value: "yes" },
-      label_ru: "Введите IBAN (без пробелов):",
-      help_ru: "Введите номер IBAN полностью, без пробелов. Например: DE12345678901234567890.",
+      label_ru: "IBAN (можно пропустить, чтобы ввести вручную)",
+      help_ru:
+        "IBAN — это номер вашего банковского счёта в международном формате (обычно начинается с двух букв, например DE…). Поле необязательное: если хотите — введите IBAN вручную; если не готовы указывать реквизиты сейчас, просто пропустите шаг.",
       pdf: { x: 60, y: 155, fontSize: 10 }
-    },
-
+    }
+,
     // 18 — Есть номер Sozial-/Rentenversicherung?
     {
       key: "has_rentenversicherung",
