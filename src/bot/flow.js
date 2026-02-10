@@ -6,32 +6,26 @@ import { explainField } from "../ai/fieldExplainer.js";
 import { allFields } from "../forms/buergergeld/pages/allPages.js";
 import { sections } from "../forms/buergergeld/pages/allPages.js";
 
-
 const DEBUG_SKIP = process.env.DEBUG_SKIP === "true";
-console.log("FLOW DEBUG_SKIP =", DEBUG_SKIP, "ENV =", process.env.DEBUG_SKIP);
+
 // =======================
 // UI helpers
 // =======================
 function buildNavInlineKeyboard(field) {
   const rows = [];
-
   const navRow = [{ text: "⬅️ Назад", callback_data: "nav:back" }];
 
-  // нормальный пропуск только если поле optional
   if (field?.required === false) {
     navRow.push({ text: "⏭ Пропустить", callback_data: "nav:skip" });
   }
 
-  // DEBUG пропуск (вперёд) — даже для required
   if (DEBUG_SKIP) {
     navRow.push({ text: "➡️ Вперёд (debug)", callback_data: "nav:next_debug" });
   }
 
   navRow.push({ text: "🔄 Restart", callback_data: "nav:restart" });
-
   rows.push(navRow);
 
-  // DEBUG: тестовые данные
   if (DEBUG_SKIP) {
     rows.push([{ text: "⚡ Тестовые данные", callback_data: "debug:fill_test" }]);
   }
@@ -58,10 +52,8 @@ function buildChoiceInlineKeyboard(field) {
   }
 
   navRow.push({ text: "🔄 Restart", callback_data: "nav:restart" });
-
   rows.push(navRow);
 
-  // DEBUG: тестовые данные
   if (DEBUG_SKIP) {
     rows.push([{ text: "⚡ Тестовые данные", callback_data: "debug:fill_test" }]);
   }
@@ -78,13 +70,7 @@ function buildMultiChoiceInlineKeyboard(field, selectedValues = []) {
   const rows = field.options.map((o) => {
     const isSelected = selectedSet.has(o.value);
     const label = isSelected ? `✅ ${o.label_ru}` : `⬜ ${o.label_ru}`;
-
-    return [
-      {
-        text: label,
-        callback_data: `mchoice:${field.key}:${o.value}`
-      }
-    ];
+    return [{ text: label, callback_data: `mchoice:${field.key}:${o.value}` }];
   });
 
   rows.push([
@@ -98,7 +84,6 @@ function buildMultiChoiceInlineKeyboard(field, selectedValues = []) {
     { text: "🔄 Restart", callback_data: "nav:restart" }
   ]);
 
-  // DEBUG: тестовые данные
   if (DEBUG_SKIP) {
     rows.push([{ text: "⚡ Тестовые данные", callback_data: "debug:fill_test" }]);
   }
@@ -108,7 +93,6 @@ function buildMultiChoiceInlineKeyboard(field, selectedValues = []) {
 
   return { reply_markup: { inline_keyboard: rows } };
 }
-
 // =======================
 // Flow helpers
 // =======================
@@ -117,25 +101,18 @@ function isFieldAvailable(field, answers) {
 
   const depKey = field.dependsOn.key;
   const depValue = field.dependsOn.value;
-
   const actual = answers?.[depKey];
 
-  // multi_choice -> массив
-  if (Array.isArray(actual)) {
-    return actual.includes(depValue);
-  }
+  if (Array.isArray(actual)) return actual.includes(depValue);
 
-  // multi_choice -> строка "a,b,c"
   if (typeof actual === "string") {
-    const arr = actual
+    return actual
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean);
-
-    return arr.includes(depValue);
+      .filter(Boolean)
+      .includes(depValue);
   }
 
-  // обычный случай
   return actual === depValue;
 }
 
@@ -148,18 +125,14 @@ function clearDependentAnswers(changedKey, session) {
     for (const field of allFields) {
       if (!field.dependsOn) continue;
 
-      const { key: depKey } = field.dependsOn;
+      const depKey = field.dependsOn.key;
 
-      // если поле зависит от изменённого ключа
       if (depKey === changedKey) {
         if (session.answers[field.key] !== undefined) {
           delete session.answers[field.key];
           delete session.rawAnswers[field.key];
           clearDependentAnswers(field.key, session);
           removed = true;
-
-          // рекурсивно чистим цепочку
-          clearDependentAnswers(field.key, session);
         }
       }
     }
@@ -169,8 +142,7 @@ function clearDependentAnswers(changedKey, session) {
 function getNextAvailableStep(fromStep, answers) {
   let step = fromStep;
   while (step < allFields.length) {
-    const f = allFields[step];
-    if (isFieldAvailable(f, answers)) return step;
+    if (isFieldAvailable(allFields[step], answers)) return step;
     step++;
   }
   return step;
@@ -179,8 +151,7 @@ function getNextAvailableStep(fromStep, answers) {
 function getPrevAvailableStep(fromStep, answers) {
   let step = fromStep;
   while (step >= 0) {
-    const f = allFields[step];
-    if (isFieldAvailable(f, answers)) return step;
+    if (isFieldAvailable(allFields[step], answers)) return step;
     step--;
   }
   return 0;
@@ -191,85 +162,6 @@ function getCurrentField(session) {
   session.step = getNextAvailableStep(session.step, session.answers);
   return allFields[session.step];
 }
-
-function getQuestionProgress(session, page) {
-  if (!session || !page) return null;
-
-  const visibleFields = page.fields.filter(field => {
-    if (!field.dependsOn) return true;
-
-    const val = session.answers[field.dependsOn.key];
-    return val === field.dependsOn.value;
-  });
-
-  const totalQuestions = visibleFields.length;
-
-  // текущее поле
-  const currentKey = session.currentFieldKey;
-  let currentQuestion = 1;
-
-  if (currentKey) {
-    const index = visibleFields.findIndex(f => f.key === currentKey);
-    if (index >= 0) {
-      currentQuestion = index + 1;
-    }
-  }
-
-  return {
-    question: currentQuestion,
-    totalQuestions
-  };
-}
-
-function formatProgress(session, form, page) {
-  const pageIndex = session.pageIndex;
-  const totalPages = form.pages.length;
-
-  const q = getQuestionProgress(session, page);
-
-  if (!q) return "";
-
-  return (
-    `📄 Страница ${pageIndex + 1} из ${totalPages}\n` +
-    `📊 Вопрос ${q.question} из ${q.totalQuestions}\n\n`
-  );
-}
-
-
-// =======================
-// Explain helper
-// =======================
-async function explainCurrentField(ctx) {
-  const session = getSession(ctx.from.id);
-  if (!session.answers) session.answers = {};
-  if (!session.rawAnswers) session.rawAnswers = {};
-  if (typeof session.step !== "number") session.step = 0;
-
-  const field = getCurrentField(session);
-  if (!field) {
-    await ctx.reply("❓ Сейчас нет активного поля для объяснения.");
-    return;
-  }
-
-  const text = field.help_ru || "Пояснение для этого поля пока не добавлено.";
-
-  if (field.type === "choice") {
-    await ctx.reply(`📌 Объяснение:\n\n${text}`, buildChoiceInlineKeyboard(field));
-    return;
-  }
-
-  if (field.type === "multi_choice") {
-    const selected = session.answers?.[field.key] || [];
-    await ctx.reply(
-      `📌 Объяснение:\n\n${text}`,
-      buildMultiChoiceInlineKeyboard(field, selected)
-    );
-    return;
-  }
-
-  await ctx.reply(`📌 Объяснение:\n\n${text}`, buildNavInlineKeyboard(field));
-}
-
 
 // =======================
 // Public API
@@ -286,7 +178,6 @@ export async function startFlow(ctx) {
   await ctx.reply("📝 Начинаем заполнение анкеты.");
   await askNextQuestion(ctx);
 }
-
 
 export async function restartFlow(ctx) {
   const session = getSession(ctx.from.id);
@@ -329,7 +220,6 @@ export async function skipCurrentField(ctx) {
   if (typeof session.step !== "number") session.step = 0;
 
   session.step = getNextAvailableStep(session.step, session.answers);
-
   const field = allFields[session.step];
   if (!field) return;
 
@@ -359,7 +249,6 @@ export async function debugNext(ctx) {
   if (typeof session.step !== "number") session.step = 0;
 
   session.step = getNextAvailableStep(session.step, session.answers);
-
   const field = allFields[session.step];
   if (!field) return;
 
@@ -380,15 +269,12 @@ export async function fillTestData(ctx) {
   if (!session.rawAnswers) session.rawAnswers = {};
   if (typeof session.step !== "number") session.step = 0;
 
-  // заполняем все доступные поля по dependsOn
   for (let i = 0; i < allFields.length; i++) {
     const field = allFields[i];
 
     if (!isFieldAvailable(field, session.answers)) continue;
-
     if (session.answers[field.key] !== undefined) continue;
 
-    // choice
     if (field.type === "choice" && field.options?.length) {
       const v = field.options.find((o) => o.value === "yes")?.value ?? field.options[0].value;
       session.answers[field.key] = v;
@@ -397,12 +283,8 @@ export async function fillTestData(ctx) {
       continue;
     }
 
-    // multi_choice
     if (field.type === "multi_choice" && field.options?.length) {
-      const selected = field.options
-        .slice(0, Math.min(2, field.options.length))
-        .map((o) => o.value);
-
+      const selected = field.options.slice(0, 2).map((o) => o.value);
       session.answers[field.key] = selected;
       session.rawAnswers[field.key] = selected
         .map((v) => field.options.find((o) => o.value === v)?.label_ru || v)
@@ -410,15 +292,9 @@ export async function fillTestData(ctx) {
       continue;
     }
 
-    // text (эвристики)
     const key = String(field.key || "").toLowerCase();
 
-    if (
-      key.includes("date") ||
-      key.includes("datum") ||
-      key.includes("from") ||
-      key.includes("to")
-    ) {
+    if (key.includes("date") || key.includes("datum") || key.includes("from") || key.includes("to")) {
       session.answers[field.key] = "01.01.2025";
       session.rawAnswers[field.key] = "01.01.2025";
       continue;
@@ -452,14 +328,15 @@ export async function fillTestData(ctx) {
     session.rawAnswers[field.key] = "TEST";
   }
 
-  // перейти на первый незаполненный доступный шаг
   session.step = 0;
   session.step = getNextAvailableStep(session.step, session.answers);
 
   await ctx.reply("⚡ Готово! Тестовые данные заполнены. Можно жать PDF 🙂");
   await askNextQuestion(ctx);
 }
-
+// =======================
+// PDF generation
+// =======================
 export async function generatePdfNow(ctx) {
   const session = getSession(ctx.from.id);
   if (!session.answers) session.answers = {};
@@ -481,6 +358,18 @@ export async function generatePdfNow(ctx) {
   }
 }
 
+function buildAfterPdfKeyboard() {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "📌 Важная информация", callback_data: "info:after_pdf" }],
+        [{ text: "⭐ Оставить отзыв", callback_data: "feedback:ask" }],
+        [{ text: "🔄 Restart", callback_data: "nav:restart" }]
+      ]
+    }
+  };
+}
+
 async function sendImportantNotes(ctx) {
   await ctx.reply(
 `📌 Важная информация перед подачей
@@ -493,28 +382,52 @@ async function sendImportantNotes(ctx) {
 • В отдельных случаях Jobcenter сверяет данные с другими ведомствами.
 • Указание телефона является добровольным.
 
-📎 Документы, которые Jobcenter часто запрашивает (если относится к вашей ситуации):
+📎 Документы, которые Jobcenter часто запрашивает:
 • Выписки по банковским счетам за последние 3 месяца
 • Договор аренды и подтверждение расходов на жильё/отопление
-• Документы о доходах (зарплата, Minijob, Selbständigkeit)
+• Документы о доходах
 • Информация о медицинской страховке
-• Документы членов семьи/совместного проживания
+• Документы членов семьи
 • При необходимости: подтверждения инвалидности или особых потребностей
 `
   );
 }
 
-function buildAfterPdfKeyboard() {
-  return {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "📌 Важная информация", callback_data: "info:after_pdf" }],
-        [{ text: "🔄 Restart", callback_data: "nav:restart" }]
-      ]
-    }
-  };
+async function explainCurrentField(ctx) {
+  const session = getSession(ctx.from.id);
+
+  if (!session.answers) session.answers = {};
+  if (!session.rawAnswers) session.rawAnswers = {};
+  if (typeof session.step !== "number") session.step = 0;
+
+  const field = allFields[session.step];
+  if (!field) {
+    await ctx.reply("❓ Сейчас нет активного поля для объяснения.");
+    return;
+  }
+
+  const text = field.help_ru || "Пояснение для этого поля пока не добавлено.";
+
+  if (field.type === "choice") {
+    await ctx.reply(`📌 Объяснение:\n\n${text}`, buildChoiceInlineKeyboard(field));
+    return;
+  }
+
+  if (field.type === "multi_choice") {
+    const selected = session.answers?.[field.key] || [];
+    await ctx.reply(
+      `📌 Объяснение:\n\n${text}`,
+      buildMultiChoiceInlineKeyboard(field, selected)
+    );
+    return;
+  }
+
+  await ctx.reply(`📌 Объяснение:\n\n${text}`, buildNavInlineKeyboard(field));
 }
 
+// =======================
+// handleAnswer
+// =======================
 export async function handleAnswer(ctx) {
   const session = getSession(ctx.from.id);
 
@@ -523,7 +436,6 @@ export async function handleAnswer(ctx) {
   if (typeof session.step !== "number") session.step = 0;
 
   session.step = getNextAvailableStep(session.step, session.answers);
-
   const field = allFields[session.step];
   if (!field) return;
 
@@ -536,8 +448,7 @@ export async function handleAnswer(ctx) {
 
   if (value.startsWith("/")) {
     await ctx.reply("ℹ️ Команда получена. Продолжаем 🙂");
-    await askNextQuestion(ctx);
-    return;
+    return askNextQuestion(ctx);
   }
 
   // choice текстом не принимаем
@@ -556,6 +467,7 @@ export async function handleAnswer(ctx) {
     return;
   }
 
+  // валидация
   const validation = validateAnswer(field, value);
   if (!validation.ok) {
     await ctx.reply(`⚠️ ${validation.message}`, buildNavInlineKeyboard(field));
@@ -566,7 +478,6 @@ export async function handleAnswer(ctx) {
 
   let processedValue = value;
 
-  // перевод/нормализация через ИИ (только если translate !== false)
   if (field.translate !== false) {
     const processed = await processField(field, value);
     processedValue = processed?.translated ?? value;
@@ -586,14 +497,16 @@ export async function handleAnswer(ctx) {
   await askNextQuestion(ctx);
 }
 
+// =======================
+// handleChoiceCallback
+// =======================
 export async function handleChoiceCallback(ctx) {
   const session = getSession(ctx.from.id);
+  const data = ctx.callbackQuery?.data || "";
 
   if (!session.rawAnswers) session.rawAnswers = {};
   if (!session.answers) session.answers = {};
   if (typeof session.step !== "number") session.step = 0;
-
-  const data = ctx.callbackQuery?.data || "";
 
   // навигация
   if (data === "nav:back") {
@@ -622,22 +535,17 @@ export async function handleChoiceCallback(ctx) {
     return sendImportantNotes(ctx);
   }
 
-
-  // DEBUG: заполнить тестовыми данными
   if (data === "debug:fill_test") {
     await ctx.answerCbQuery();
     return fillTestData(ctx);
   }
 
-  // объяснение
   if (data === "help:field") {
     await ctx.answerCbQuery();
     return explainCurrentField(ctx);
   }
 
-  // -----------------------
   // multi_choice
-  // -----------------------
   if (data.startsWith("mchoice:")) {
     const [, fieldKey, value] = data.split(":");
 
@@ -652,10 +560,7 @@ export async function handleChoiceCallback(ctx) {
     let selected = session.answers[field.key];
 
     if (typeof selected === "string") {
-      selected = selected
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+      selected = selected.split(",").map((s) => s.trim()).filter(Boolean);
     }
 
     if (!Array.isArray(selected)) selected = [];
@@ -678,7 +583,7 @@ export async function handleChoiceCallback(ctx) {
       await ctx.editMessageReplyMarkup(
         buildMultiChoiceInlineKeyboard(field, selected).reply_markup
       );
-    } catch (e) {}
+    } catch {}
 
     return;
   }
@@ -699,27 +604,8 @@ export async function handleChoiceCallback(ctx) {
     session.step++;
     session.step = getNextAvailableStep(session.step, session.answers);
 
-    await askNextQuestion(ctx);
-    return;
+    return askNextQuestion(ctx);
   }
-
-  // === ОБРАБОТКА ОБЗОРА ===
-if (data === "summary:pdf") {
-  await ctx.answerCbQuery();
-  return generatePdfNow(ctx);
-}
-
-if (data === "summary:edit") {
-  await ctx.answerCbQuery();
-  const session = getSession(ctx.from.id);
-
-  // возвращаемся на первый доступный вопрос
-  session.step = 0;
-  session.step = getNextAvailableStep(session.step, session.answers);
-
-  await ctx.reply("✏️ Хорошо, вы можете изменить ответы.");
-  return askNextQuestion(ctx);
-}
 
   if (data.startsWith("mchoice_clear:")) {
     const [, fieldKey] = data.split(":");
@@ -741,21 +627,19 @@ if (data === "summary:edit") {
       await ctx.editMessageReplyMarkup(
         buildMultiChoiceInlineKeyboard(field, []).reply_markup
       );
-    } catch (e) {}
+    } catch {}
 
     return;
   }
 
-  // -----------------------
   // choice
-  // -----------------------
   if (!data.startsWith("choice:")) return;
 
   const [, fieldKey, selectedValue] = data.split(":");
 
   session.step = getNextAvailableStep(session.step, session.answers);
-
   const field = allFields[session.step];
+
   if (!field || field.key !== fieldKey || field.type !== "choice") {
     await ctx.answerCbQuery("⚠️ Этот выбор уже неактуален");
     return;
@@ -768,15 +652,15 @@ if (data === "summary:edit") {
   }
 
   session.rawAnswers[field.key] = selected.label_ru;
-session.answers[field.key] = selected.value;
+  session.answers[field.key] = selected.value;
 
-clearDependentAnswers(field.key, session);
+  clearDependentAnswers(field.key, session);
 
-await ctx.answerCbQuery(); // просто закрываем всплывающее окно без текста
+  await ctx.answerCbQuery();
 
   try {
     await ctx.editMessageText(`${field.label_ru}\n\n✅ Вы выбрали: ${selected.label_ru}`);
-  } catch (e) {}
+  } catch {}
 
   session.step++;
   session.step = getNextAvailableStep(session.step, session.answers);
@@ -784,22 +668,53 @@ await ctx.answerCbQuery(); // просто закрываем всплывающ
   await askNextQuestion(ctx);
 }
 
+// =======================
+// askNextQuestion
+// =======================
+async function askNextQuestion(ctx) {
+  const session = getSession(ctx.from.id);
 
-function getCurrentSection(session) {
-  const currentKey = allFields[session.step]?.key;
-  return sections.find(sec => sec.fields.includes(currentKey)) || null;
-}
+  if (typeof session.step !== "number") session.step = 0;
+  session.step = getNextAvailableStep(session.step, session.answers);
 
-function getProgressPercent(session) {
-  const total = allFields.length;
-  const current = session.step + 1;
-  return Math.round((current / total) * 100);
-}
+  if (session.step < allFields.length) {
+    const nextField = allFields[session.step];
 
-function makeProgressBar(percent) {
-  const totalBlocks = 12;
-  const filled = Math.round((percent / 100) * totalBlocks);
-  return "█".repeat(filled) + "░".repeat(totalBlocks - filled) + ` ${percent}%`;
+    const section = sections.find((sec) => sec.fields.includes(nextField.key));
+    const percent = Math.round(((session.step + 1) / allFields.length) * 100);
+    const bar = "█".repeat(Math.round(percent / 8)) + "░".repeat(12 - Math.round(percent / 8));
+
+    const header = `${section?.title || "📄 Раздел"}\n${bar} ${percent}%\n\n`;
+
+    if (nextField.type === "choice") {
+      await ctx.reply(header + nextField.label_ru, buildChoiceInlineKeyboard(nextField));
+      return;
+    }
+
+    if (nextField.type === "multi_choice") {
+      const currentValues = session.answers?.[nextField.key] || [];
+      await ctx.reply(
+        header + nextField.label_ru,
+        buildMultiChoiceInlineKeyboard(nextField, currentValues)
+      );
+      return;
+    }
+
+    await ctx.reply(header + nextField.label_ru, buildNavInlineKeyboard(nextField));
+    return;
+  }
+
+  const summary = buildSummary(session);
+
+  await ctx.reply(summary, {
+    parse_mode: "Markdown",
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "✏️ Изменить ответы", callback_data: "summary:edit" }],
+        [{ text: "📄 Продолжить → PDF", callback_data: "summary:pdf" }]
+      ]
+    }
+  });
 }
 
 function buildSummary(session) {
@@ -807,9 +722,9 @@ function buildSummary(session) {
 
   for (const section of sections) {
     const fieldsInSection = section.fields
-      .map(key => allFields.find(f => f.key === key))
+      .map((key) => allFields.find((f) => f.key === key))
       .filter(Boolean)
-      .filter(f => session.answers[f.key] !== undefined);
+      .filter((f) => session.answers[f.key] !== undefined);
 
     if (fieldsInSection.length === 0) continue;
 
@@ -824,68 +739,4 @@ function buildSummary(session) {
   }
 
   return text;
-}
-
-// =======================
-// Ask next question
-// =======================
-async function askNextQuestion(ctx) {
-  const session = getSession(ctx.from.id);
-
-  if (typeof session.step !== "number") session.step = 0;
-  session.step = getNextAvailableStep(session.step, session.answers);
-
-  if (session.step < allFields.length) {
-    const nextField = allFields[session.step];
-
-    // === ПРОГРЕСС ===
-    const section = getCurrentSection(session);
-    const percent = getProgressPercent(session);
-    const bar = makeProgressBar(percent);
-
-    const header =
-      `${section?.title || "📄 Раздел"}\n` +
-      `${bar}\n\n`;
-
-    // === CHOICE ===
-    if (nextField.type === "choice" && nextField.options?.length) {
-      await ctx.reply(
-        header + nextField.label_ru,
-        buildChoiceInlineKeyboard(nextField)
-      );
-      return;
-    }
-
-    // === MULTI CHOICE ===
-    if (nextField.type === "multi_choice" && nextField.options?.length) {
-      const currentValues = session.answers?.[nextField.key] || [];
-      await ctx.reply(
-        header + nextField.label_ru,
-        buildMultiChoiceInlineKeyboard(nextField, currentValues)
-      );
-      return;
-    }
-
-    // === TEXT ===
-    await ctx.reply(
-      header + nextField.label_ru,
-      buildNavInlineKeyboard(nextField)
-    );
-    return;
-  }
-
-// === КОНЕЦ АНКЕТЫ — ПОКАЗЫВАЕМ ОБЗОР ===
-const summary = buildSummary(session);
-
-await ctx.reply(summary, {
-  parse_mode: "Markdown",
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: "✏️ Изменить ответы", callback_data: "summary:edit" }],
-      [{ text: "📄 Продолжить → PDF", callback_data: "summary:pdf" }]
-    ]
-  }
-});
-
-return; 
 }

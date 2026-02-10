@@ -39,9 +39,9 @@ export function startBot() {
   console.log("📘 Data policy:", dataPolicy);
 
   const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+  const feedbackUsers = new Set();
 
   // пользователи, которые сейчас пишут отзыв
-  const feedbackUsers = new Set();
 
   bot.start(async (ctx) => {
     stats.starts++;
@@ -119,6 +119,20 @@ export function startBot() {
   await ctx.answerCbQuery("Спасибо! Начинаем заполнение.");
   return startFlow(ctx);
 }
+
+if (data === "feedback:ask") {
+  await ctx.answerCbQuery();
+
+  feedbackUsers.add(ctx.chat.id);
+
+  await ctx.reply(
+    "📝 Напишите ваш отзыв или проблему.\n" +
+    "Я передам его разработчику."
+  );
+
+  return;
+}
+
 
     if (data === "privacy:decline") {
       await ctx.answerCbQuery();
