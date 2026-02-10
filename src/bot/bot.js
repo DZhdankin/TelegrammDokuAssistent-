@@ -140,8 +140,16 @@ export function startBot() {
         const adminId = process.env.ADMIN_CHAT_ID;
 
         if (adminId) {
-          await ctx.telegram.sendMessage(adminId, userInput);
+          const username = ctx.from.username
+            ? `@${ctx.from.username}`
+            : `ID ${ctx.from.id}`;
+
+          await ctx.telegram.sendMessage(
+            adminId,
+            `📝 Отзыв от ${username}:\n${userInput}`
+          );
         }
+
 
         return ctx.reply("Спасибо! Отзыв отправлен разработчику.");
       }
