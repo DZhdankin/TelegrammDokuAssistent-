@@ -9,6 +9,24 @@ import {
 } from "./flow.js";
 import { dataPolicy } from "./dataPolicy.js";
 
+// статистика
+const stats = {
+  starts: 0,
+  flowsStarted: 0,
+  pdfGenerated: 0,
+  feedbackSent: 0
+};
+
+function logStats(event) {
+  console.log(
+    `📊 [${event}]`,
+    `starts=${stats.starts}`,
+    `flows=${stats.flowsStarted}`,
+    `pdf=${stats.pdfGenerated}`,
+    `feedback=${stats.feedbackSent}`
+  );
+}
+
 // анти-спам
 const lastMessageTime = new Map();
 
@@ -26,6 +44,8 @@ export function startBot() {
   const feedbackUsers = new Set();
 
   bot.start(async (ctx) => {
+    stats.starts++;
+    logStats("START");
     await ctx.reply(
       "👋 *Тестовая версия бота*\n\n" +
         "Этот бот помогает заполнять немецкие формы.\n" +
@@ -84,15 +104,21 @@ export function startBot() {
 
   bot.command("restart", async (ctx) => restartFlow(ctx));
   bot.command("back", async (ctx) => goBack(ctx));
-  bot.command("pdf", async (ctx) => generatePdfNow(ctx));
+  bot.command("pdf", async (ctx) => {
+    stats.pdfGenerated++;
+    logStats("PDF");
+    return generatePdfNow(ctx);
+  });
 
   bot.on("callback_query", async (ctx) => {
     const data = ctx.callbackQuery?.data || "";
 
     if (data === "privacy:accept") {
-      await ctx.answerCbQuery("Спасибо! Начинаем заполнение.");
-      return startFlow(ctx);
-    }
+  stats.flowsStarted++;
+  logStats("FLOW_START");
+  await ctx.answerCbQuery("Спасибо! Начинаем заполнение.");
+  return startFlow(ctx);
+}
 
     if (data === "privacy:decline") {
       await ctx.answerCbQuery();
@@ -150,7 +176,8 @@ export function startBot() {
           );
         }
 
-
+        stats.feedbackSent++;
+        logStats("FEEDBACK");
         return ctx.reply("Спасибо! Отзыв отправлен разработчику.");
       }
 
@@ -169,6 +196,54 @@ export function startBot() {
       );
     }
   });
+
+function scheduleDailyReport(bot) {
+  const adminId = process.env.ADMIN_CHAT_ID;
+  if (!adminId) return;
+
+  function msUntil22() {
+    const now = new Date();
+    const target = new Date();
+
+    target.setHours(22, 0, 0, 0);
+
+    // если уже позже 22:00 — ставим на завтра
+    if (now > target) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    return target - now;
+  }
+
+  function sendReport() {
+    const text =
+      "📊 Ежедневный отчёт бота:\n\n" +
+      `👋 Запусков: ${stats.starts}\n` +
+      `🧾 Начали форму: ${stats.flowsStarted}\n` +
+      `📄 PDF создано: ${stats.pdfGenerated}\n` +
+      `📝 Отзывов: ${stats.feedbackSent}`;
+
+    bot.telegram.sendMessage(adminId, text).catch(console.error);
+
+    // после отправки — сбрасываем суточную статистику
+    stats.starts = 0;
+    stats.flowsStarted = 0;
+    stats.pdfGenerated = 0;
+    stats.feedbackSent = 0;
+
+    // планируем следующий отчёт через 24 часа
+    setTimeout(sendReport, 24 * 60 * 60 * 1000);
+  }
+
+  // первый запуск в ближайшие 22:00
+  setTimeout(sendReport, msUntil22());
+}
+
+  scheduleDailyReport(bot);
+  
+  setInterval(() => {
+  logStats("AUTO");
+}, 5 * 60 * 1000);
 
   bot.launch();
   console.log("🤖 Telegram bot started");
