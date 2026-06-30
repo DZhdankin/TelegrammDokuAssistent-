@@ -7,7 +7,7 @@ export const page3 = {
     {
       key: "isAbleToWork",
       label_ru: "Вы трудоспособны? (можете работать минимум 3 часа в день)",
-      help_ru: "Выберите «Да», если вы физически и психически способны работать минимум 3 часа в день. Это важно для определения права на Bürgergeld.",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы физически и психически способны работать минимум 3 часа в день. Это поле используется в форме для оценки трудоспособности.",
       type: "choice",
       required: true,
       translate: false,
@@ -21,7 +21,7 @@ export const page3 = {
     {
       key: "isStudentOrTrainee",
       label_ru: "Вы школьник/студент или проходите Ausbildung?",
-      help_ru: "Выберите «Да», если вы учитесь в школе, университете или проходите профессиональное обучение (Ausbildung).",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы учитесь в школе, университете или проходите профессиональное обучение (Ausbildung).",
       type: "choice",
       required: true,
       translate: false,
@@ -35,7 +35,7 @@ export const page3 = {
     {
       key: "hasSchoolCosts",
       label_ru: "Есть расходы на школьные учебники/тетради?",
-      help_ru: "Выберите «Да», если вам или вашему ребёнку нужно покупать учебники, рабочие тетради или школьные материалы.",
+      help_ru: "Вариант «Да» относится к ситуации, когда есть расходы на учебники, рабочие тетради или школьные материалы.",
       type: "choice",
       required: true,
       translate: false,
@@ -49,7 +49,7 @@ export const page3 = {
     {
       key: "isAccommodatedDuringTraining",
       label_ru: "Во время обучения вы проживаете отдельно (общежитие/интернат/и т.д.)?",
-      help_ru: "Выберите «Да», если вы живёте в общежитии, интернате или другом учреждении во время обучения.",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы живёте в общежитии, интернате или другом учреждении во время обучения.",
       type: "choice",
       required: true,
       translate: false,
@@ -63,7 +63,7 @@ export const page3 = {
     {
       key: "isUnder18or18to24",
       label_ru: "Вам меньше 18 лет или вам от 18 до 24 лет?",
-      help_ru: "Выберите «Да», если вы младше 18 или вам от 18 до 24 лет. Это влияет на расчёт выплат.",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы младше 18 или вам от 18 до 24 лет. Это поле используется в форме для расчёта.",
       type: "choice",
       required: true,
       translate: false,
@@ -77,7 +77,7 @@ export const page3 = {
     {
       key: "parentLivesOutsideBG",
       label_ru: "Один из родителей живёт отдельно (не входит в вашу Bedarfsgemeinschaft)?",
-      help_ru: "Выберите «Да», если один из родителей живёт отдельно и не является частью вашей Bedarfsgemeinschaft (семейной единицы для Jobcenter).",
+      help_ru: "Вариант «Да» относится к ситуации, когда один из родителей живёт отдельно и не является частью вашей Bedarfsgemeinschaft (семейной единицы для Jobcenter).",
       type: "choice",
       required: true,
       translate: false,
@@ -91,7 +91,7 @@ export const page3 = {
     {
       key: "hasOrWillStartTraining",
       label_ru: "Вы проходите или планируете начать обучение / Ausbildung?",
-      help_ru: "Выберите «Да», если вы уже проходите Ausbildung или планируете начать его в ближайшее время.",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы уже проходите Ausbildung или планируете начать его в ближайшее время.",
       type: "choice",
       required: true,
       translate: false,
@@ -105,7 +105,7 @@ export const page3 = {
     {
       key: "receivesAsylumBenefits",
       label_ru: "Вы получаете выплаты по Asylbewerberleistungsgesetz?",
-      help_ru: "Выберите «Да», если вы получаете выплаты для соискателей убежища (Asylbewerberleistungen).",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы получаете выплаты для соискателей убежища (Asylbewerberleistungen).",
       type: "choice",
       required: true,
       translate: false,
@@ -118,8 +118,8 @@ export const page3 = {
     // 35 — Bis wann?
     {
       key: "asylumBenefitsUntil",
-      label_ru: "До какой даты вы получаете эти выплаты? (ДД.ММ.ГГГГ) Если не знаете — напишите «-»",
-      help_ru: "Введите дату, до которой вам назначены выплаты по Asylbewerberleistungsgesetz. Если не знаете — напишите «-».",
+      label_ru: "До какой даты вы получаете эти выплаты? (ДД.ММ.ГГГГ) Если неизвестно, можно указать «-»",
+      help_ru: "Введите дату, до которой вам назначены выплаты по Asylbewerberleistungsgesetz. Если неизвестно, можно указать «-».",
       type: "date",
       required: false,
       translate: false,
@@ -153,7 +153,7 @@ export const page3 = {
     {
       key: "receivedBenefitsLast3Years",
       label_ru: "За последние 3 года вы уже получали Bürgergeld/Sozialhilfe?",
-      help_ru: "Выберите «Да», если вы получали Bürgergeld, Sozialhilfe или аналогичные выплаты в последние 3 года.",
+      help_ru: "Вариант «Да» относится к ситуации, когда вы получали Bürgergeld, Sozialhilfe или аналогичные выплаты в последние 3 года.",
       type: "choice",
       required: true,
       translate: false,
@@ -166,8 +166,8 @@ export const page3 = {
     // 39 — Art der Leistung
     {
       key: "benefitType",
-      label_ru: "Укажите вид выплаты (например Bürgergeld / Sozialhilfe). Если не было — напишите «-»",
-      help_ru: "Укажите, какие выплаты вы получали ранее. Например: Bürgergeld, Sozialhilfe, Wohngeld. Если не знаете — напишите «-».",
+      label_ru: "Укажите вид выплаты (например Bürgergeld / Sozialhilfe). Если не было, можно указать «-»",
+      help_ru: "Укажите, какие выплаты вы получали ранее. Например: Bürgergeld, Sozialhilfe, Wohngeld. Если неизвестно, можно указать «-».",
       type: "text",
       required: false,
       translate: true,

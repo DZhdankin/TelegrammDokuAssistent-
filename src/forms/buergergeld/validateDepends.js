@@ -1,7 +1,8 @@
-import { allFields } from "./pages/allPages.js";
+import { buergergeldForm } from "./index.js";
 
 function validateDependsOn() {
   const errors = [];
+  const allFields = buergergeldForm.fields;
 
   // карта всех полей: key → { field, index }
   const fieldMap = new Map();

@@ -1,38 +1,69 @@
 /**
- * Локальные объяснения (самые точные и безопасные).
- * Здесь НЕТ данных пользователя — только логика и тексты.
- *
- * Важно:
- * - ключи должны совпадать с key в pageX.js
- * - чем больше help здесь, тем меньше запросов к ИИ
+ * Local fallback explanations used when a page field has no own help text.
+ * The content is kept entirely in the repository and does not call external AI.
  */
 
 export const fieldHelpMap = {
-  // =========================
-  // Страница 2 — важные поля
-  // =========================
-
   has_guardian: {
-    title: "Опекун / Betreuer / Vormund",
-    text: `📌 Что это значит:
+    title: {
+      ru: "Опекун / Betreuer / Vormund",
+      de: "Betreuer / Vormund",
+      uk: "Опікун / піклувальник"
+    },
+    text: {
+      ru: `📌 Что это значит:
 Опекун (Betreuer/Vormund) — это человек, которого официально назначил суд или ведомство, чтобы он представлял вас в делах (документы, финансы, медицина).
 
-✅ Когда отвечать "Да":
+✅ Вариант "Да":
 Если у вас есть официальный Betreuer/Vormund и есть документ о назначении (решение суда).
 
-❌ Когда отвечать "Нет":
+❌ Вариант "Нет":
 Если вы сами подписываете документы и решаете свои вопросы.
 
 🔎 Где это подтверждается:
 Обычно есть письмо/решение от Amtsgericht / Betreuungsgericht.
 
-💡 Если не уверены:
-В большинстве случаев это "Нет".`
+💡 Ориентир:
+Обычно ориентируются на официальный документ или подтверждённую ситуацию.`,
+      de: `📌 Was bedeutet das:
+Ein Betreuer oder Vormund ist eine Person, die vom Gericht oder einer Behörde offiziell bestellt wurde, um Sie in Angelegenheiten zu vertreten (Unterlagen, Finanzen, medizinische Fragen).
+
+✅ Antwort "Ja":
+Wenn Sie einen offiziellen Betreuer/Vormund haben und ein Bestelldokument (Gerichtsentscheidung) vorliegt.
+
+❌ Antwort "Nein":
+Wenn Sie Ihre Unterlagen selbst unterschreiben und Ihre Angelegenheiten selbst regeln.
+
+🔎 Wo das bestätigt wird:
+Meist gibt es einen Beschluss oder ein Schreiben vom Amtsgericht / Betreuungsgericht.
+
+💡 Orientierung:
+Maßgeblich ist in der Regel das offizielle Dokument oder eine bestätigte Betreuungssituation.`,
+      uk: `📌 Що це означає:
+Опікун або піклувальник — це людина, яку офіційно призначив суд або орган, щоб вона представляла вас у справах (документи, фінанси, медицина).
+
+✅ Варіант "Так":
+Якщо у вас є офіційний Betreuer/Vormund і є документ про призначення (рішення суду).
+
+❌ Варіант "Ні":
+Якщо ви самі підписуєте документи й самостійно вирішуєте свої питання.
+
+🔎 Де це підтверджується:
+Зазвичай є лист або рішення від Amtsgericht / Betreuungsgericht.
+
+💡 Орієнтир:
+Зазвичай орієнтуються на офіційний документ або підтверджену ситуацію.`
+    }
   },
 
   iban: {
-    title: "IBAN",
-    text: `📌 Что это:
+    title: {
+      ru: "IBAN",
+      de: "IBAN",
+      uk: "IBAN"
+    },
+    text: {
+      ru: `📌 Что это:
 IBAN — номер банковского счёта.
 
 🔎 Где найти:
@@ -45,12 +76,46 @@ IBAN — номер банковского счёта.
 Пример: DE12345678901234567890
 
 ✍️ Как вводить:
-Без пробелов.`
+Без пробелов.`,
+      de: `📌 Was ist das:
+IBAN ist die Nummer Ihres Bankkontos.
+
+🔎 Wo zu finden:
+• in der Banking-App
+• im Kontoauszug oder Vertrag
+• im Online-Banking
+
+⚠️ Format für Deutschland:
+Beginnt mit DE und hat insgesamt 22 Zeichen (DE + 20 Ziffern).
+Beispiel: DE12345678901234567890
+
+✍️ Eingabe:
+Ohne Leerzeichen.`,
+      uk: `📌 Що це:
+IBAN — це номер банківського рахунку.
+
+🔎 Де знайти:
+• у банківському застосунку
+• у виписці або договорі
+• в онлайн-банкінгу
+
+⚠️ Формат для Німеччини:
+Починається з DE і має всього 22 символи (DE + 20 цифр).
+Приклад: DE12345678901234567890
+
+✍️ Як вводити:
+Без пробілів.`
+    }
   },
 
   rentenversicherung_number: {
-    title: "Sozialversicherungsnummer / Rentenversicherung",
-    text: `📌 Что это за номер:
+    title: {
+      ru: "Социальный номер / пенсионное страхование",
+      de: "Sozialversicherungsnummer / Rentenversicherung",
+      uk: "Номер соціального страхування / пенсійного страхування"
+    },
+    text: {
+      ru: `📌 Что это за номер:
 Sozialversicherungsnummer / Rentenversicherungsnummer — номер пенсионного/социального страхования в Германии.
 
 🔎 Где найти:
@@ -59,12 +124,38 @@ Sozialversicherungsnummer / Rentenversicherungsnummer — номер пенси�
 • Lohnabrechnung (расчётный лист)
 
 ✍️ Если нет:
-Выбирайте "Нет" или ставьте "-" (если просят номер).`
+Если номера нет, обычно указывают вариант "Нет" или "-" в текстовом поле.`,
+      de: `📌 Welche Nummer ist gemeint:
+Die Sozialversicherungsnummer bzw. Rentenversicherungsnummer ist die Nummer Ihrer Renten- und Sozialversicherung in Deutschland.
+
+🔎 Wo zu finden:
+• Schreiben der Deutschen Rentenversicherung
+• Sozialversicherungsausweis
+• Lohnabrechnung
+
+✍️ Wenn nicht vorhanden:
+Wenn die Nummer unbekannt ist, wird meist die Option "Nein" oder "-" im Textfeld verwendet.`,
+      uk: `📌 Що це за номер:
+Sozialversicherungsnummer / Rentenversicherungsnummer — номер пенсійного або соціального страхування в Німеччині.
+
+🔎 Де знайти:
+• лист від Deutsche Rentenversicherung
+• Sozialversicherungsausweis
+• Lohnabrechnung (розрахунковий лист)
+
+✍️ Якщо немає:
+Якщо номера немає, зазвичай обирають варіант "Ні" або "-" у текстовому полі.`
+    }
   },
 
   has_residence_permit: {
-    title: "Aufenthaltstitel (ВНЖ)",
-    text: `📌 Что это значит:
+    title: {
+      ru: "Разрешение на проживание",
+      de: "Aufenthaltstitel",
+      uk: "Дозвіл на проживання"
+    },
+    text: {
+      ru: `📌 Что это значит:
 Aufenthaltstitel — это действующий вид на жительство в Германии (пластиковая карточка).
 
 ✅ "Да":
@@ -73,28 +164,84 @@ Aufenthaltstitel — это действующий вид на жительст�
 ❌ "Нет":
 Если карточки нет (например только ожидание решения / другие временные бумаги).
 
-💡 Если не уверены:
-Посмотрите документ из Ausländerbehörde.`
+💡 Где сверить:
+Обычно можно сверить с документом из Ausländerbehörde.`,
+      de: `📌 Was bedeutet das:
+Ein Aufenthaltstitel ist ein gültiger Aufenthaltstitel bzw. eine Aufenthaltskarte in Deutschland (Plastikkarte).
+
+✅ "Ja":
+Wenn Sie eine Aufenthaltstitel-Karte haben und diese gültig ist.
+
+❌ "Nein":
+Wenn keine Karte vorliegt (zum Beispiel nur ein Bescheid in Bearbeitung oder andere vorläufige Unterlagen).
+
+💡 Abgleich:
+Meist kann man dies mit dem Dokument der Ausländerbehörde prüfen.`,
+      uk: `📌 Що це означає:
+Aufenthaltstitel — це чинний дозвіл на проживання в Німеччині (пластикова картка).
+
+✅ "Так":
+Якщо у вас є картка Aufenthaltstitel і вона чинна.
+
+❌ "Ні":
+Якщо картки немає (наприклад, лише очікування рішення або інші тимчасові папери).
+
+💡 Де перевірити:
+Зазвичай це можна звірити з документом від Ausländerbehörde.`
+    }
   },
 
   has_verpflichtung: {
-    title: "Verpflichtungserklärung (поручительство)",
-    text: `📌 Что это значит:
+    title: {
+      ru: "Verpflichtungserklärung / поручительство",
+      de: "Verpflichtungserklärung",
+      uk: "Зобов’язання про фінансове забезпечення"
+    },
+    text: {
+      ru: `📌 Что это значит:
 Verpflichtungserklärung — это документ, когда другой человек в Германии официально обязуется оплачивать ваши расходы (часто для визы/въезда).
 
-✅ Ответьте "Да":
+✅ Вариант "Да":
 Если кто-то подписывал за вас такую бумагу в Ausländerbehörde / консульстве, и у вас есть документ.
 
-❌ Ответьте "Нет":
+❌ Вариант "Нет":
 Если вы приехали без поручителя и никто не подписывал обязательство.
 
-💡 Если не уверены:
-В большинстве случаев это "Нет".`
+💡 Ориентир:
+Обычно ориентируются на официальный документ или подтверждённую ситуацию.`,
+      de: `📌 Was bedeutet das:
+Eine Verpflichtungserklärung ist ein Dokument, mit dem sich eine andere Person in Deutschland offiziell verpflichtet, Ihre Kosten zu übernehmen (oft für Visum oder Einreise).
+
+✅ Antwort "Ja":
+Wenn jemand eine solche Erklärung für Sie bei der Ausländerbehörde oder im Konsulat unterschrieben hat und Sie das Dokument besitzen.
+
+❌ Antwort "Nein":
+Wenn Sie ohne Verpflichtungsgeber eingereist sind und niemand eine solche Erklärung unterschrieben hat.
+
+💡 Orientierung:
+Maßgeblich ist in der Regel das offizielle Dokument oder die bestätigte Situation.`,
+      uk: `📌 Що це означає:
+Verpflichtungserklärung — це документ, коли інша людина в Німеччині офіційно зобов’язується оплачувати ваші витрати (часто для візи або в’їзду).
+
+✅ Варіант "Так":
+Якщо хтось підписував за вас таку заяву в Ausländerbehörde / консульстві, і у вас є документ.
+
+❌ Варіант "Ні":
+Якщо ви приїхали без поручителя і ніхто не підписував зобов’язання.
+
+💡 Орієнтир:
+Зазвичай орієнтуються на офіційний документ або підтверджену ситуацію.`
+    }
   },
 
   familienstand: {
-    title: "Семейное положение",
-    text: `📌 Что это значит:
+    title: {
+      ru: "Семейное положение",
+      de: "Familienstand",
+      uk: "Сімейний стан"
+    },
+    text: {
+      ru: `📌 Что это значит:
 Семейное положение на текущий момент.
 
 Примеры:
@@ -105,12 +252,42 @@ Verpflichtungserklärung — это документ, когда другой ч
 • dauernd_getrennt — живёте раздельно (официально)
 
 💡 Важно:
-Выбирайте то, что актуально СЕЙЧАС.`
+Ориентир — текущий официальный статус на момент заполнения.`,
+      de: `📌 Was bedeutet das:
+Der aktuelle Familienstand.
+
+Beispiele:
+• ledig — ledig
+• verheiratet — verheiratet
+• geschieden — geschieden
+• verwitwet — verwitwet
+• dauernd_getrennt — dauerhaft getrennt lebend (offiziell)
+
+💡 Wichtig:
+Maßgeblich ist der aktuelle offizielle Status zum Zeitpunkt der Antragstellung.`,
+      uk: `📌 Що це означає:
+Поточний сімейний стан.
+
+Приклади:
+• ledig — не одружений/не заміжня
+• verheiratet — одружений/заміжня
+• geschieden — розлучений(а)
+• verwitwet — вдівець / вдова
+• dauernd_getrennt — проживаєте окремо (офіційно)
+
+💡 Важливо:
+Орієнтир — поточний офіційний статус на момент заповнення.`
+    }
   },
 
   familienstand_date: {
-    title: "Дата развода / раздельного проживания / прекращения партнёрства",
-    text: `📌 Что это:
+    title: {
+      ru: "Дата развода / раздельного проживания / прекращения партнёрства",
+      de: "Datum der Scheidung / Trennung / Aufhebung der Partnerschaft",
+      uk: "Дата розлучення / роз’їзду / припинення партнерства"
+    },
+    text: {
+      ru: `📌 Что это:
 Эту дату заполняют только если вы:
 • живёте раздельно (dauernd getrennt)
 • разведены (geschieden)
@@ -121,365 +298,65 @@ Verpflichtungserklärung — это документ, когда другой ч
 ДД.ММ.ГГГГ
 
 💡 Если нет точной даты:
-Лучше посмотреть в документах (решение суда/дата развода).`
+Можно посмотреть в документах (решение суда/дата развода).`,
+      de: `📌 Was ist gemeint:
+Dieses Datum füllen Sie nur aus, wenn Sie:
+• dauerhaft getrennt leben
+• geschieden sind
+• verwitwet sind
+• eine Partnerschaft beendet haben
+
+✍️ Format:
+TT.MM.JJJJ
+
+💡 Wenn das genaue Datum fehlt:
+Es lässt sich meist in Unterlagen prüfen (Gerichtsentscheidung oder Scheidungsdatum).`,
+      uk: `📌 Що мається на увазі:
+Цю дату заповнюють лише якщо ви:
+• проживаєте окремо
+• розлучені
+• вдівець / вдова
+• партнерство припинено
+
+✍️ Формат:
+ДД.ММ.РРРР
+
+💡 Якщо точної дати немає:
+Її можна подивитися в документах (рішення суду / дата розлучення).`
+    }
   },
 
   antrag_ab: {
-    title: "С какого момента получать Bürgergeld",
-    text: `📌 Что это значит:
+    title: {
+      ru: "С какого момента получать Bürgergeld",
+      de: "Ab wann Bürgergeld erhalten",
+      uk: "З якого моменту отримувати Bürgergeld"
+    },
+    text: {
+      ru: `📌 Что это значит:
 С какого момента вы хотите получать Bürgergeld.
 
 • "Сразу" — с ближайшего возможного момента (обычно с начала месяца подачи)
 • "Позже" — если хотите указать конкретную дату
 
-💡 Если не уверены:
-Обычно выбирают "Сразу".`
-  },
-
-  // =========================
-  // Страница 3 — жизненная ситуация
-  // =========================
-
-  isAbleToWork: {
-    title: "Трудоспособность (Erwerbsfähig)",
-    text: `📌 Что это значит:
-Вы можете работать минимум 3 часа в день (по состоянию здоровья).
-
-✅ "Да":
-Если в целом можете работать хотя бы частично.
-
-❌ "Нет":
-Если по состоянию здоровья это невозможно.
-
-💡 Если не уверены:
-Чаще выбирают "Да", если нет официального запрета/болезни.`
-  },
-
-  isStudentOrTrainee: {
-    title: "Учёба / Ausbildung",
-    text: `📌 Что это значит:
-Вы сейчас:
-• школьник
-• студент
-• проходите Ausbildung
-
-✅ "Да":
-Если вы реально учитесь и можете подтвердить документами.
-
-❌ "Нет":
-Если нет.`
-  },
-
-  hasSchoolCosts: {
-    title: "Расходы на учебники/тетради",
-    text: `📌 Что это значит:
-Есть ли дополнительные расходы на школьные материалы.
-
-✅ "Да":
-Если вы покупаете учебники/тетради и это заметные траты.
-
-❌ "Нет":
-Если таких расходов нет или они неактуальны.`
-  },
-
-  isAccommodatedDuringTraining: {
-    title: "Проживание отдельно во время обучения",
-    text: `📌 Что это значит:
-Во время учёбы/обучения вы живёте в:
-• общежитии
-• интернате
-• казарме
-• спец. учреждении
-или у работодателя с полным обеспечением.
-
-✅ "Да":
-Если реально так живёте.
-
-❌ "Нет":
-Если живёте дома/в обычной квартире сами.`
-  },
-
-  isUnder18or18to24: {
-    title: "Возраст до 18 или 18–24",
-    text: `📌 Что это:
-Просто вопрос о вашем возрасте.
-
-✅ "Да":
-Если вам меньше 18 или от 18 до 24 включительно.
-
-❌ "Нет":
-Если вам 25 или больше.`
-  },
-
-  parentLivesOutsideBG: {
-    title: "Родитель вне Bedarfsgemeinschaft",
-    text: `📌 Что это значит:
-Bedarfsgemeinschaft — это “семья/совместный бюджет” в понимании Jobcenter.
-
-Вопрос: живёт ли один из родителей отдельно от вас (не в вашей Bedarfsgemeinschaft).
-
-✅ "Да":
-Если один из родителей живёт отдельно.
-
-❌ "Нет":
-Если родители живут с вами или вопрос не относится к вам.`
-  },
-
-  hasOrWillStartTraining: {
-    title: "Начнёте/проходите Ausbildung",
-    text: `📌 Что это значит:
-Вы сейчас проходите обучение (Ausbildung) или собираетесь начать.
-
-✅ "Да":
-Если уже начали или точно начнёте.
-
-❌ "Нет":
-Если нет.`
-  },
-
-  receivesAsylumBenefits: {
-    title: "Asylbewerberleistungsgesetz (AsylbLG)",
-    text: `📌 Что это значит:
-Это выплаты для просителей убежища (Asylbewerberleistungen), которые выдаёт Sozialamt.
-
-✅ "Да":
-Если вы реально получаете выплаты по AsylbLG и у вас есть Bescheid (решение).
-
-❌ "Нет":
-Если вы получаете Bürgergeld или ничего не получаете.
-
-💡 Если не уверены:
-Посмотрите последние письма/переводы от Sozialamt или Jobcenter.`
-  },
-
-  asylumBenefitsUntil: {
-    title: "До какой даты вы получаете Asylbewerberleistungen",
-    text: `📌 Что это значит:
-Если вы получаете выплаты по AsylbLG, нужно указать дату, до которой они назначены.
-
-✍️ Формат:
-ДД.ММ.ГГГГ
-
-💡 Если не знаете:
-Можно поставить "-" и потом уточнить по Bescheid.`
-  },
-
-  personIdNumber: {
-    title: "Personenidentifikationsnummer / Steuer-ID",
-    text: `📌 Что это за номер:
-Personenidentifikationsnummer = Steuer-ID (налоговый ID в Германии).
-Это номер из 11 цифр, он выдаётся один раз на всю жизнь.
-
-🔎 Где найти:
-• письмо от Bundeszentralamt für Steuern
-• письма от Finanzamt
-• иногда в документах от работодателя
-
-✍️ Что писать если нет/не знаете:
-Поставьте "-" (как в боте).`
-  },
-
-  azrNumber: {
-    title: "AZR-Nummer",
-    text: `📌 Что это за номер:
-AZR-Nummer (Ausländerzentralregister) — регистрационный номер иностранца в Германии.
-
-🔎 Где найти:
-• письма от Ausländerbehörde / BAMF
-• иногда встречается в документах по ВНЖ
-
-✍️ Если нет/не знаете:
-Поставьте "-".`
-  },
-
-  receivedBenefitsLast3Years: {
-    title: "Получали ли Bürgergeld/Sozialhilfe за последние 3 года",
-    text: `📌 Что это значит:
-Нужно указать, получали ли вы в Германии пособия от Jobcenter/Sozialamt за последние 3 года.
-
-✅ "Да":
-Если вы уже получали Bürgergeld/ALG II/Sozialhilfe.
-
-❌ "Нет":
-Если вы не получали.
-
-💡 Если сомневаетесь:
-Проверьте письма от Jobcenter или банковские переводы.`
-  },
-
-  benefitType: {
-    title: "Вид пособия (если получали)",
-    text: `📌 Что это значит:
-Если вы ответили "Да" (получали выплаты), нужно указать какие именно.
-
-Примеры:
-• Bürgergeld
-• Sozialhilfe
-• Arbeitslosengeld II (старое название)
-
-💡 Если не знаете:
-Можно написать примерно или поставить "-" и уточнить позже.`
-  },
-
-  // =========================
-  // Страница 4 — работа и выплаты
-  // =========================
-
-  wasEmployedLast5Years: {
-    title: "Работали ли вы по найму за последние 5 лет",
-    text: `📌 Что это значит:
-Вопрос про официальную работу по трудовому договору (angestellt/beschäftigt).
-
-✅ "Да":
-Если у вас был работодатель и вы получали зарплату (Lohn).
-
-❌ "Нет":
-Если вы не работали официально по найму.`
-  },
-
-  hasUnpaidWageClaims: {
-    title: "Невыплаченная зарплата от работодателя",
-    text: `📌 Что это значит:
-Есть ли у вас долг по зарплате от бывшего работодателя.
-
-✅ "Да":
-Если работодатель должен вам деньги.
-
-❌ "Нет":
-Если нет долгов по зарплате.`
-  },
-
-  wasSelfEmployed: {
-    title: "Самозанятость / фриланс за последние 5 лет",
-    text: `📌 Что это значит:
-Вопрос про работу на себя (Selbständig / Freiberuflich).
-
-✅ "Да":
-Если вы работали как самозанятый (например Gewerbe, фриланс).
-
-❌ "Нет":
-Если вы не работали на себя.`
-  },
-
-  receivedWageReplacementBenefits: {
-    title: "Entgeltersatzleistungen (Krankengeld, Elterngeld и т.п.)",
-    text: `📌 Что это значит:
-Это выплаты, которые заменяют зарплату:
-Krankengeld, Arbeitslosengeld, Elterngeld, Übergangsgeld и т.д.
-
-✅ "Да":
-Если вы получали такие выплаты.
-
-❌ "Нет":
-Если не получали.`
-  },
-
-  wageReplacementBenefitType: {
-    title: "Какой именно вид выплаты (Krankengeld/Elterngeld...)",
-    text: `📌 Что это значит:
-Если вы получали выплаты вместо зарплаты, укажите какие именно.
-
-Примеры:
-• Krankengeld (больничные)
-• Arbeitslosengeld (пособие по безработице)
-• Elterngeld (родительские)
-• Übergangsgeld
-
-💡 Если не знаете точно:
-Можно написать примерно.`
-  },
-
-  // =========================
-  // Страница 5 — прочее
-  // =========================
-
-  caredForRelatives: {
-    title: "Уход за родственниками (Pflege)",
-    text: `📌 Что это значит:
-Вы ухаживали за родственниками официально (Pflege nach SGB XI).
-
-✅ "Да":
-Если вы реально осуществляли уход и есть подтверждение.
-
-❌ "Нет":
-Если такого не было.`
-  },
-
-  howSupportedYourselfLast5Years: {
-    title: "Как вы обеспечивали себя последние 5 лет",
-    text: `📌 Что писать:
-Если ни один вариант выше не подходит — опишите, на что вы жили.
-
-Примеры:
-• помощь родственников/друзей
-• сбережения
-• работа за границей
-• накопления
-• поддержка семьи
-
-💡 Можно коротко:
-Например: "Unterstützung durch Familie" или "Ersparnisse".`
-  },
-
-  appliedForOtherBenefits: {
-    title: "Подавали/планируете подать на другие выплаты",
-    text: `📌 Что это значит:
-Нужно указать, подавали ли вы уже или собираетесь подать на другие виды помощи (Wohngeld, Kindergeld и т.д.).
-
-✅ "Да":
-Если вы уже подали или точно собираетесь подавать.
-
-❌ "Нет":
-Если не подавали и не планируете.`
-  },
-
-  otherBenefitsList: {
-    title: "Какие именно выплаты (можно выбрать несколько)",
-    text: `📌 Что это значит:
-Выберите те выплаты, на которые вы уже подали или хотите подать.
-Можно выбрать несколько вариантов.
-
-💡 Если ничего из списка нет:
-Ничего не выбирайте и нажмите "Готово".`
-  },
-
-  otherBenefitsOtherText: {
-    title: "Sonstiges — какие именно выплаты",
-    text: `📌 Что это значит:
-Если вы выбрали "Sonstiges", нужно написать какие именно выплаты вы имеете в виду.
-
-Примеры:
-• Unterhaltsvorschuss
-• Leistungen vom Sozialamt
-• Unterstützung vom Verein
-• другое пособие
-
-💡 Если не уверены:
-Можно написать коротко и потом уточнить.`
-  },
-
-  healthDamageByThirdParty: {
-    title: "Ущерб здоровью по вине третьих лиц",
-    text: `📌 Что это значит:
-Например ДТП, несчастный случай на работе, нападение, ошибка врача.
-
-✅ "Да":
-Если было такое событие и из-за этого вы подаёте на Bürgergeld.
-
-❌ "Нет":
-Если ничего такого не было.`
-  },
-
-  claimsAgainstThirdParties: {
-    title: "Требования к третьим лицам (компенсация/наследство)",
-    text: `📌 Что это значит:
-Есть ли у вас право на деньги от других лиц:
-компенсация, страховка, наследство, Schadensersatz.
-
-✅ "Да":
-Если точно есть такие выплаты/требования.
-
-❌ "Нет":
-Если нет.`
+💡 Ориентир:
+"Сразу" означает ближайший возможный момент; "Позже" — конкретную дату.`,
+      de: `📌 Was bedeutet das:
+Ab wann Sie Bürgergeld erhalten möchten.
+
+• "Sofort" — zum nächstmöglichen Zeitpunkt (meist ab dem Monat der Antragstellung)
+• "Später" — wenn Sie ein konkretes Datum angeben möchten
+
+💡 Orientierung:
+"Sofort" meint den frühestmöglichen Zeitpunkt; "Später" ein konkretes Datum.`,
+      uk: `📌 Що це означає:
+З якого моменту ви хочете отримувати Bürgergeld.
+
+• "Одразу" — з найближчого можливого моменту (зазвичай з початку місяця подання)
+• "Пізніше" — якщо хочете вказати конкретну дату
+
+💡 Орієнтир:
+"Одразу" означає найближчий можливий момент; "Пізніше" — конкретну дату.`
+    }
   }
 };

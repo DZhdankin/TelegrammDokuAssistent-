@@ -8,27 +8,60 @@ import {
   generatePdfNow
 } from "./flow.js";
 import { dataPolicy } from "./dataPolicy.js";
-
-// статистика
-const stats = {
-  starts: 0,
-  flowsStarted: 0,
-  pdfGenerated: 0,
-  feedbackSent: 0
-};
-
-function logStats(event) {
-  console.log(
-    `📊 [${event}]`,
-    `starts=${stats.starts}`,
-    `flows=${stats.flowsStarted}`,
-    `pdf=${stats.pdfGenerated}`,
-    `feedback=${stats.feedbackSent}`
-  );
-}
+import { getSession } from "../storage/sessions.js";
+import { t } from "../services/botMessages.js";
+import { getForm, listForms } from "../forms/registry.js";
+import { getStats, logStats, resetStats, trackStat } from "../services/botStats.js";
 
 // анти-спам
 const lastMessageTime = new Map();
+
+const languageButtons = [
+  [{ text: "🇷🇺 Русский", callback_data: "start_lang:ru" }],
+  [{ text: "🇩🇪 Deutsch", callback_data: "start_lang:de" }],
+  [{ text: "🇺🇦 Українська", callback_data: "start_lang:uk" }]
+];
+
+function getLanguage(ctx) {
+  return getSession(ctx.from.id).language || "ru";
+}
+
+function buildPrivacyKeyboard(language) {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: t(language, "accept"), callback_data: "privacy:accept" }],
+        [{ text: t(language, "decline"), callback_data: "privacy:decline" }]
+      ]
+    }
+  };
+}
+
+async function sendLanguageChoice(ctx) {
+  await ctx.reply(
+    "Выберите язык / Wählen Sie die Sprache / Оберіть мову:",
+    {
+    reply_markup: { inline_keyboard: languageButtons }
+    }
+  );
+}
+
+async function sendFormChoice(ctx, language) {
+  const buttons = listForms().map((form) => [
+    { text: form.title || form.id, callback_data: `start_form:${form.id}` }
+  ]);
+
+  await ctx.reply(t(language, "formPrompt"), {
+    reply_markup: { inline_keyboard: buttons }
+  });
+}
+
+async function sendWelcome(ctx, language) {
+  await ctx.reply(t(language, "welcome"), {
+    parse_mode: "Markdown",
+    ...buildPrivacyKeyboard(language)
+  });
+}
 
 export function startBot() {
   if (!process.env.TELEGRAM_BOT_TOKEN) {
@@ -44,79 +77,56 @@ export function startBot() {
   // пользователи, которые сейчас пишут отзыв
 
   bot.start(async (ctx) => {
-    stats.starts++;
+    trackStat(ctx, "starts");
     logStats("START");
-    await ctx.reply(
-      "👋 *Тестовая версия бота*\n\n" +
-        "Этот бот помогает заполнять немецкую форму Bürgergeld.\n" +
-        "Сейчас он находится в стадии тестирования.\n\n" +
-        "🔐 Ваши данные:\n" +
-        "• не сохраняются на сервере\n" +
-        "• используются только для создания PDF\n" +
-        "• автоматически удаляются через 30 минут\n\n" +
-        "⚠️ *Юридическое уведомление*\n" +
-        "Этот бот не является юридическим консультантом и не даёт юридических советов.\n" +
-        "Все подсказки носят информационный характер и не заменяют консультацию специалистов.\n" +
-        "Ответственность за корректность введённых данных несёт пользователь.\n\n" +
-        "Если готовы начать — нажмите «Согласен».",
-      {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "✅ Согласен", callback_data: "privacy:accept" }],
-            [{ text: "❌ Не согласен", callback_data: "privacy:decline" }]
-          ]
-        }
-      }
-    );
+    await sendLanguageChoice(ctx);
   });
 
   // /privacy
   bot.command("privacy", async (ctx) => {
-    await ctx.reply(
-      "🔐 Политика данных (тестовая версия)\n\n" +
-        "• Данные не сохраняются в базе данных.\n" +
-        "• Сессия хранится только в памяти и удаляется через 30 минут.\n" +
-        "• PDF создаётся в памяти и не записывается на диск.\n" +
-        "• Данные не передаются третьим лицам.\n\n" +
-        "⚠️ Юридическое уведомление\n" +
-        "Этот бот не предоставляет юридических консультаций.\n" +
-        "Все подсказки носят исключительно информационный характер.\n" +
-        "Для юридически значимых вопросов обращайтесь в Jobcenter или к квалифицированным консультантам.\n\n" +
-        "———\n" +
-        "🇩🇪 *Juristischer Hinweis (Deutsch)*\n" +
-        "Dieser Bot bietet keine Rechtsberatung.\n" +
-        "Alle Hinweise dienen nur der Orientierung und ersetzen keine professionelle Beratung.\n" +
-        "Für die Richtigkeit der Angaben ist der Nutzer selbst verantwortlich.",
-      { parse_mode: "Markdown" }
-    );
+    await ctx.reply(t(getLanguage(ctx), "privacy"), { parse_mode: "Markdown" });
   });
 
   // команда отзыва
   bot.command("feedback", async (ctx) => {
     feedbackUsers.add(ctx.chat.id);
-
-    await ctx.reply(
-      "📝 Напишите ваш отзыв или проблему.\n" +
-        "Я передам его разработчику."
-    );
+    await ctx.reply(t(getLanguage(ctx), "feedbackAsk"));
   });
 
   bot.command("restart", async (ctx) => restartFlow(ctx));
   bot.command("back", async (ctx) => goBack(ctx));
-  bot.command("pdf", async (ctx) => {
-    stats.pdfGenerated++;
-    logStats("PDF");
-    return generatePdfNow(ctx);
-  });
+  bot.command("pdf", async (ctx) => generatePdfNow(ctx));
 
   bot.on("callback_query", async (ctx) => {
     const data = ctx.callbackQuery?.data || "";
+    const session = getSession(ctx.from.id);
+
+    if (data.startsWith("start_lang:")) {
+      const [, language] = data.split(":");
+      session.language = language;
+
+      await ctx.answerCbQuery(t(language, "languageSelected"));
+      return sendFormChoice(ctx, language);
+    }
+
+    if (data.startsWith("start_form:")) {
+      const [, formId] = data.split(":");
+
+      try {
+        const form = getForm(formId);
+        session.formId = form.id;
+        await ctx.answerCbQuery(`${t(session.language, "formSelected")} ${form.title || form.id}`);
+        return sendWelcome(ctx, session.language);
+      } catch {
+        await ctx.answerCbQuery(`${t(session.language, "formNotFound")} ${formId}`);
+        return;
+      }
+    }
 
     if (data === "privacy:accept") {
-  stats.flowsStarted++;
+  trackStat(ctx, "flowsStarted");
   logStats("FLOW_START");
-  await ctx.answerCbQuery("Спасибо! Начинаем заполнение.");
+  await ctx.answerCbQuery(t(session.language, "privacyAccepted"));
   return startFlow(ctx);
 }
 
@@ -125,10 +135,7 @@ if (data === "feedback:ask") {
 
   feedbackUsers.add(ctx.chat.id);
 
-  await ctx.reply(
-    "📝 Напишите ваш отзыв или проблему.\n" +
-    "Я передам его разработчику."
-  );
+  await ctx.reply(t(session.language, "feedbackAsk"));
 
   return;
 }
@@ -136,11 +143,7 @@ if (data === "feedback:ask") {
 
     if (data === "privacy:decline") {
       await ctx.answerCbQuery();
-      return ctx.reply(
-        "❌ Вы отказались от обработки данных.\n" +
-          "Анкета не может быть заполнена без согласия.\n\n" +
-          "Если передумаете — введите /start."
-      );
+      return ctx.reply(t(session.language, "privacyDeclined"));
     }
 
     try {
@@ -148,7 +151,7 @@ if (data === "feedback:ask") {
     } catch (err) {
       console.error("callback_query error:", err?.message || err);
       try {
-        await ctx.answerCbQuery("❌ Ошибка. Попробуйте ещё раз.");
+        await ctx.answerCbQuery(t(session.language, "callbackError"));
       } catch (e) {}
     }
   });
@@ -158,6 +161,7 @@ if (data === "feedback:ask") {
       const chatId = ctx.chat.id;
       const userInput = ctx.message.text;
       const now = Date.now();
+      const language = getLanguage(ctx);
 
       // анти-спам: 1 сообщение в секунду
       const last = lastMessageTime.get(chatId) || 0;
@@ -168,9 +172,7 @@ if (data === "feedback:ask") {
 
       // ограничение длины
       if (userInput.length > 200) {
-        return ctx.reply(
-          "Слишком длинный ответ. Пожалуйста, введите короткое значение."
-        );
+        return ctx.reply(t(language, "tooLong"));
       }
 
       // если пользователь пишет отзыв
@@ -190,24 +192,20 @@ if (data === "feedback:ask") {
           );
         }
 
-        stats.feedbackSent++;
+        trackStat(ctx, "feedbackSent");
         logStats("FEEDBACK");
-        return ctx.reply("Спасибо! Отзыв отправлен разработчику.");
+        return ctx.reply(t(language, "feedbackThanks"));
       }
 
       // проверка на кириллицу
       if (/[\u0400-\u04FF]/.test(userInput)) {
-        return ctx.reply(
-          "Пожалуйста, вводите данные латиницей, как в документах. Кириллица не допускается."
-        );
+        return ctx.reply(t(language, "cyrillicBlocked"));
       }
 
       await handleAnswer(ctx);
     } catch (err) {
       console.error("text handler error:", err?.message || err);
-      await ctx.reply(
-        "❌ Ошибка при обработке ответа. Попробуйте ещё раз."
-      );
+      await ctx.reply(t(getLanguage(ctx), "answerError"));
     }
   });
 
@@ -229,7 +227,8 @@ function scheduleDailyReport(bot) {
     return target - now;
   }
 
-  function sendReport() {
+  async function sendReport() {
+    const stats = getStats();
     const text =
       "📊 Ежедневный отчёт бота:\n\n" +
       `👋 Запусков: ${stats.starts}\n` +
@@ -237,13 +236,16 @@ function scheduleDailyReport(bot) {
       `📄 PDF создано: ${stats.pdfGenerated}\n` +
       `📝 Отзывов: ${stats.feedbackSent}`;
 
-    bot.telegram.sendMessage(adminId, text).catch(console.error);
+    try {
+      await bot.telegram.sendMessage(adminId, text);
+    } catch (err) {
+      console.error("Daily stats report error:", err?.message || err);
+      setTimeout(sendReport, 24 * 60 * 60 * 1000);
+      return;
+    }
 
     // после отправки — сбрасываем суточную статистику
-    stats.starts = 0;
-    stats.flowsStarted = 0;
-    stats.pdfGenerated = 0;
-    stats.feedbackSent = 0;
+    resetStats();
 
     // планируем следующий отчёт через 24 часа
     setTimeout(sendReport, 24 * 60 * 60 * 1000);

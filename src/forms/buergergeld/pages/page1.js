@@ -40,7 +40,7 @@ export const page1 = {
     {
       key: "geburtsname_changed",
       label_ru: "Фамилия менялась?",
-      help_ru: "Укажите, менялась ли ваша фамилия. Если фамилия сейчас отличается от фамилии при рождении — выберите «Да».",
+      help_ru: "Поле уточняет, менялась ли ваша фамилия. Вариант «Да» относится к ситуации, когда текущая фамилия отличается от фамилии при рождении.",
       type: "choice",
       required: true,
       translate: false,
@@ -54,7 +54,7 @@ export const page1 = {
     {
       key: "geburtsname",
       label_ru: "Введите фамилию при рождении:",
-      help_ru: "Введите фамилию при рождении латиницей. Если не уверены — проверьте в свидетельстве о рождении или старых документах.",
+      help_ru: "Введите фамилию при рождении латиницей. Обычно её можно сверить со свидетельством о рождении или старыми документами.",
       type: "text",
       required: true,
       translate: true,
@@ -99,7 +99,7 @@ export const page1 = {
     {
       key: "geschlecht",
       label_ru: "Выберите пол:",
-      help_ru: "Выберите ваш пол. Если не хотите указывать — выберите «Не указывать».",
+      help_ru: "Поле относится к полу, указанному в документах. Если поле не хочется заполнять, предусмотрен вариант «Не указывать».",
       type: "choice",
       required: true,
       translate: false,
@@ -159,7 +159,7 @@ export const page1 = {
     {
       key: "postfachanschrift",
       label_ru: "Введите Postfachanschrift (если есть):",
-      help_ru: "Введите адрес абонентского ящика (Postfach), если он у вас есть. Если нет — оставьте пустым.",
+      help_ru: "Введите адрес абонентского ящика (Postfach), если он у вас есть. Если нет, поле можно оставить пустым.",
       type: "text",
       required: false,
       translate: false,
@@ -180,14 +180,14 @@ export const page1 = {
     // 16 — Kein fester Wohnsitz
     {
       key: "kein_fester_wohnsitz",
-      label_ru: "У вас нет постоянного места жительства?",
-      help_ru: "Выберите «Да», если у вас нет постоянного адреса проживания в Германии.",
+      label_ru: "У вас есть постоянный адрес проживания в Германии?",
+      help_ru: "Вариант «Нет, адреса нет» означает, что постоянного адреса проживания в Германии сейчас нет. В PDF при этом отмечается поле «kein fester Wohnsitz».",
       type: "choice",
       required: true,
       translate: false,
       options: [
-        { value: "no", label_ru: "Нет" },
-        { value: "yes", label_ru: "Да", pdf: { x: 60, y: 720, fontSize: 10 } }
+        { value: "no", label_ru: "Да, есть" },
+        { value: "yes", label_ru: "Нет, адреса нет", pdf: { x: 60, y: 720, fontSize: 10 } }
       ]
     },
 

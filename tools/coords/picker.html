@@ -3,29 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PDF Coordinate Picker PRO (Screenshot)</title>
+  <title>PDF Coordinate Picker PRO</title>
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 12px; background: #f4f4f4; }
-    .wrap { display: flex; gap: 12px; align-items: flex-start; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 12px;
+      background: #f4f4f4;
+    }
+
+    .wrap {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
     .panel {
-      width: 420px;
+      width: 480px;
       background: white;
       border-radius: 10px;
       padding: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       position: sticky;
       top: 12px;
+      max-height: calc(100vh - 24px);
+      overflow: auto;
     }
-    .panel h2 { margin: 0 0 10px; font-size: 16px; }
-    .hint { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.35; }
-    .row { display: flex; gap: 8px; margin-top: 8px; }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 28px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #444;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     input, select {
       width: 100%;
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 13px;
+      box-sizing: border-box;
     }
+
     button {
       padding: 8px 10px;
       border: none;
@@ -36,11 +68,30 @@
       font-size: 13px;
       white-space: nowrap;
     }
-    button:hover { background: #000; }
-    button.red { background: #b00020; }
-    button.red:hover { background: #8a0018; }
-    button.gray { background: #666; }
-    button.gray:hover { background: #444; }
+
+    button:hover {
+      background: #000;
+    }
+
+    button.red {
+      background: #b00020;
+    }
+
+    button.gray {
+      background: #666;
+    }
+
+    button.green {
+      background: #147a2e;
+    }
+
+    button.blue {
+      background: #174ea6;
+    }
+
+    button.orange {
+      background: #b45f06;
+    }
 
     code {
       display: block;
@@ -52,7 +103,7 @@
       user-select: all;
       font-size: 12px;
       line-height: 1.4;
-      max-height: 240px;
+      max-height: 280px;
       overflow: auto;
     }
 
@@ -63,10 +114,16 @@
       padding: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       overflow: auto;
-      max-width: calc(100vw - 460px);
+      max-width: calc(100vw - 520px);
       max-height: calc(100vh - 24px);
     }
-    #img { display: block; max-width: none; cursor: crosshair; }
+
+    #img {
+      display: block;
+      max-width: none;
+      cursor: crosshair;
+    }
+
     .dot {
       position: absolute;
       width: 8px;
@@ -76,10 +133,64 @@
       transform: translate(-50%, -50%);
       pointer-events: none;
       box-shadow: 0 0 0 2px rgba(255,255,255,0.85);
+      z-index: 5;
     }
 
-    .kv { font-size: 13px; margin-top: 8px; line-height: 1.45; }
-    .kv b { color: #111; }
+    .cell-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #174ea6;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.9);
+      z-index: 6;
+    }
+
+    .cell-number {
+      position: absolute;
+      background: #174ea6;
+      color: white;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 8px;
+      transform: translate(5px, -15px);
+      pointer-events: none;
+      z-index: 7;
+    }
+
+    .kv {
+      font-size: 13px;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .kv b {
+      color: #111;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .status {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      background: #f1f3f4;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .status.recording {
+      background: #e8f0fe;
+      color: #174ea6;
+      font-weight: bold;
+    }
 
     table {
       width: 100%;
@@ -87,34 +198,39 @@
       margin-top: 10px;
       font-size: 12px;
     }
+
     th, td {
       border-bottom: 1px solid #eee;
       padding: 6px 4px;
       text-align: left;
       vertical-align: top;
     }
-    th { color: #333; font-weight: 600; }
-    .small { font-size: 12px; color: #666; margin-top: 8px; line-height: 1.35; }
+
+    th {
+      color: #333;
+      font-weight: 600;
+    }
+
     .pill {
       display: inline-block;
       padding: 2px 6px;
       border-radius: 999px;
       background: #eee;
       font-size: 11px;
+      margin-right: 4px;
     }
   </style>
 </head>
+
 <body>
 
 <div class="wrap">
   <div class="panel">
-    <h2>📌 Coordinate Picker PRO (по скриншоту)</h2>
+    <h2>📌 Coordinate Picker PRO</h2>
 
     <div class="hint">
-      1) Положи <b>page3.png</b> рядом с этим файлом<br/>
-      2) Введи размер страницы из лога pdf-lib<br/>
-      3) Кликни по полю → заполни key → нажми <b>Добавить</b><br/>
-      4) Скопируй готовый <b>fields</b> для page3.js
+      Для обычных полей — один клик.<br>
+      Для <b>boxed_text</b> — нажми <b>Record cells</b> и кликай каждую клетку по порядку.
     </div>
 
     <div class="row">
@@ -130,28 +246,23 @@
     <div class="kv">
       <div>PDF: <b><span id="wOut">595.28</span></b> x <b><span id="hOut">841.89</span></b></div>
       <div>IMG: <b><span id="imgW">-</span></b> x <b><span id="imgH">-</span></b></div>
+      <div>x: <b><span id="xPdf">-</span></b> | y(top): <b><span id="yTop">-</span></b></div>
     </div>
 
-    <hr style="border:none;border-top:1px solid #eee;margin:10px 0;" />
-
-    <div class="kv">
-      Последний клик:
-      <div><b>x(pdf-lib)</b>: <span id="xPdf">-</span></div>
-      <div><b>y(pdf-lib)</b>: <span id="yPdf">-</span></div>
-      <div><b>y(from top)</b>: <span id="yTop">-</span></div>
-    </div>
+    <hr>
 
     <div class="row">
-      <input id="key" placeholder="key (например: vorname)" />
-      <input id="labelRu" placeholder="label_ru (опционально)" />
-    </div>
-
-    <div class="row">
-      <input id="labelDe" placeholder="label_de (опционально)" />
+      <input id="key" placeholder="key: applicant_tax_id" />
       <select id="type">
         <option value="text">text</option>
         <option value="date">date</option>
+        <option value="boxed_text">boxed_text</option>
       </select>
+    </div>
+
+    <div class="row">
+      <input id="labelRu" placeholder="label_ru" />
+      <input id="labelDe" placeholder="label_de" />
     </div>
 
     <div class="row">
@@ -159,6 +270,7 @@
         <option value="true">required: true</option>
         <option value="false">required: false</option>
       </select>
+
       <select id="translate">
         <option value="true">translate: true</option>
         <option value="false">translate: false</option>
@@ -166,15 +278,30 @@
     </div>
 
     <div class="row">
-      <input id="fontSize" type="number" value="10" />
+      <input id="fontSize" type="number" value="10" placeholder="fontSize" />
+      <input id="maxLength" type="number" value="11" placeholder="maxLength for boxed_text" />
+    </div>
+
+    <div class="row">
+      <button id="recordCells" class="blue">📦 Record cells</button>
+      <button id="finishCells" class="green">✅ Finish cells</button>
+      <button id="undoCell" class="orange">↩️ Undo cell</button>
+    </div>
+
+    <div class="row">
+      <button id="clearCells" class="gray">🧹 Clear cells</button>
       <button id="add">➕ Добавить</button>
       <button id="clear" class="red">🗑 Очистить</button>
     </div>
 
+    <div id="recordStatus" class="status">
+      Режим клеток выключен.
+    </div>
+
     <div class="small">
-      <span class="pill">Совет</span> Кликайте чуть левее внутри поля, где должен начинаться текст.
-      <br/>
-      <span class="pill">Важно</span> Мы сохраняем <b>y от верха</b> (удобно для page3.js).
+      <span class="pill">Важно</span>
+      Для <b>boxed_text</b> сохраняется массив <b>pdf.cells</b>.  
+      Это лучше, чем boxGap, потому что расстояния между группами клеток бывают разными.
     </div>
 
     <h3 style="margin:12px 0 6px;font-size:14px;">📋 Собранные поля</h3>
@@ -183,8 +310,10 @@
       <thead>
         <tr>
           <th>key</th>
+          <th>type</th>
           <th>x</th>
-          <th>y(top)</th>
+          <th>y</th>
+          <th>cells</th>
           <th></th>
         </tr>
       </thead>
@@ -195,11 +324,10 @@
       <div style="font-size:13px; margin-bottom:6px;">Готовый массив <b>fields</b>:</div>
       <code id="outFields">[]</code>
     </div>
-
   </div>
 
-  <div class="imgBox">
-    <img id="img" src="page8.png" alt="page9"/>
+  <div class="imgBox" id="imgBox">
+    <img id="img" src="page2.png" alt="page" />
     <div class="dot" id="dot" style="display:none;"></div>
   </div>
 </div>
@@ -209,6 +337,7 @@
   let PDF_H = 841.89;
 
   const img = document.getElementById("img");
+  const imgBox = document.getElementById("imgBox");
   const dot = document.getElementById("dot");
 
   const pdfW = document.getElementById("pdfW");
@@ -217,58 +346,35 @@
   const hOut = document.getElementById("hOut");
   const imgW = document.getElementById("imgW");
   const imgH = document.getElementById("imgH");
-
   const xPdf = document.getElementById("xPdf");
-  const yPdf = document.getElementById("yPdf");
   const yTop = document.getElementById("yTop");
 
   const keyEl = document.getElementById("key");
+  const typeEl = document.getElementById("type");
   const labelRuEl = document.getElementById("labelRu");
   const labelDeEl = document.getElementById("labelDe");
-  const typeEl = document.getElementById("type");
   const requiredEl = document.getElementById("required");
   const translateEl = document.getElementById("translate");
   const fontSizeEl = document.getElementById("fontSize");
+  const maxLengthEl = document.getElementById("maxLength");
 
   const tblBody = document.querySelector("#tbl tbody");
   const outFields = document.getElementById("outFields");
+  const recordStatus = document.getElementById("recordStatus");
 
-  let lastClick = null;
   let fields = [];
+  let lastClick = null;
+
+  let recordingCells = false;
+  let currentCells = [];
+  let currentCellMarkers = [];
 
   function apply() {
     PDF_W = Number(pdfW.value || 595.28);
     PDF_H = Number(pdfH.value || 841.89);
+
     wOut.textContent = PDF_W;
     hOut.textContent = PDF_H;
-  }
-
-  function renderTable() {
-    tblBody.innerHTML = "";
-    for (let i = 0; i < fields.length; i++) {
-      const f = fields[i];
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${escapeHtml(f.key)}</td>
-        <td>${f.pdf.x}</td>
-        <td>${f.pdf.y}</td>
-        <td><button data-i="${i}" class="gray">Удалить</button></td>
-      `;
-
-      tr.querySelector("button").addEventListener("click", () => {
-        fields.splice(i, 1);
-        renderAll();
-      });
-
-      tblBody.appendChild(tr);
-    }
-
-    outFields.textContent = JSON.stringify(fields, null, 2);
-  }
-
-  function renderAll() {
-    renderTable();
   }
 
   function escapeHtml(str) {
@@ -280,64 +386,230 @@
       .replaceAll("'", "&#039;");
   }
 
+  function cleanUndefined(obj) {
+    for (const key of Object.keys(obj)) {
+      if (obj[key] === undefined || obj[key] === "") {
+        delete obj[key];
+      } else if (typeof obj[key] === "object" && obj[key] !== null) {
+        cleanUndefined(obj[key]);
+      }
+    }
+    return obj;
+  }
+
+  function getPdfClick(e) {
+    const rect = img.getBoundingClientRect();
+
+    const xView = e.clientX - rect.left;
+    const yView = e.clientY - rect.top;
+
+    const nx = xView / rect.width;
+    const ny = yView / rect.height;
+
+    return {
+      x: Math.round(nx * PDF_W),
+      yTop: Math.round(ny * PDF_H),
+      yPdf: Math.round((1 - ny) * PDF_H),
+      xView,
+      yView
+    };
+  }
+
+  function setNormalDot(click) {
+    dot.style.display = "block";
+    dot.style.left = (click.xView + img.offsetLeft) + "px";
+    dot.style.top = (click.yView + img.offsetTop) + "px";
+  }
+
+  function addCellMarker(click, index) {
+    const d = document.createElement("div");
+    d.className = "cell-dot";
+    d.style.left = (click.xView + img.offsetLeft) + "px";
+    d.style.top = (click.yView + img.offsetTop) + "px";
+
+    const n = document.createElement("div");
+    n.className = "cell-number";
+    n.textContent = String(index + 1);
+    n.style.left = (click.xView + img.offsetLeft) + "px";
+    n.style.top = (click.yView + img.offsetTop) + "px";
+
+    imgBox.appendChild(d);
+    imgBox.appendChild(n);
+
+    currentCellMarkers.push(d, n);
+  }
+
+  function clearCellMarkers() {
+    for (const el of currentCellMarkers) {
+      el.remove();
+    }
+    currentCellMarkers = [];
+  }
+
+  function updateRecordStatus() {
+    if (recordingCells) {
+      recordStatus.className = "status recording";
+      recordStatus.textContent = `📦 Запись клеток включена. Клеток записано: ${currentCells.length}`;
+    } else {
+      recordStatus.className = "status";
+      recordStatus.textContent = `Режим клеток выключен. Клеток записано: ${currentCells.length}`;
+    }
+  }
+
+  function renderTable() {
+    tblBody.innerHTML = "";
+
+    fields.forEach((f, i) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${escapeHtml(f.key)}</td>
+        <td>${escapeHtml(f.type)}</td>
+        <td>${f.pdf?.x ?? ""}</td>
+        <td>${f.pdf?.y ?? ""}</td>
+        <td>${f.pdf?.cells?.length ?? ""}</td>
+        <td><button data-i="${i}" class="gray">Удалить</button></td>
+      `;
+
+      tr.querySelector("button").addEventListener("click", () => {
+        fields.splice(i, 1);
+        renderAll();
+      });
+
+      tblBody.appendChild(tr);
+    });
+
+    outFields.textContent = JSON.stringify(fields, null, 2);
+  }
+
+  function renderAll() {
+    renderTable();
+    updateRecordStatus();
+  }
+
   document.getElementById("apply").addEventListener("click", apply);
+
+  document.getElementById("recordCells").addEventListener("click", () => {
+    if (typeEl.value !== "boxed_text") {
+      alert("Сначала выбери type: boxed_text");
+      return;
+    }
+
+    recordingCells = true;
+    currentCells = [];
+    clearCellMarkers();
+    dot.style.display = "none";
+    updateRecordStatus();
+  });
+
+  document.getElementById("finishCells").addEventListener("click", () => {
+    recordingCells = false;
+    updateRecordStatus();
+
+    if (currentCells.length === 0) {
+      alert("Клетки не записаны.");
+      return;
+    }
+
+    alert(`Готово. Записано клеток: ${currentCells.length}`);
+  });
+
+  document.getElementById("undoCell").addEventListener("click", () => {
+    if (currentCells.length === 0) return;
+
+    currentCells.pop();
+
+    const n = currentCellMarkers.pop();
+    const d = currentCellMarkers.pop();
+
+    if (n) n.remove();
+    if (d) d.remove();
+
+    updateRecordStatus();
+  });
+
+  document.getElementById("clearCells").addEventListener("click", () => {
+    currentCells = [];
+    clearCellMarkers();
+    updateRecordStatus();
+  });
 
   document.getElementById("clear").addEventListener("click", () => {
     if (!confirm("Очистить все поля?")) return;
+
     fields = [];
+    currentCells = [];
+    clearCellMarkers();
     renderAll();
   });
 
   document.getElementById("copyFields").addEventListener("click", async () => {
     const text = JSON.stringify(fields, null, 2);
+
     try {
       await navigator.clipboard.writeText(text);
       alert("fields скопированы!");
-    } catch (e) {
+    } catch {
       alert("Не удалось скопировать автоматически. Скопируй вручную из блока.");
     }
   });
 
   document.getElementById("add").addEventListener("click", () => {
-    if (!lastClick) {
-      alert("Сначала кликни по картинке, чтобы получить координаты.");
-      return;
-    }
+    const key = keyEl.value.trim();
 
-    const key = (keyEl.value || "").trim();
     if (!key) {
-      alert("Введите key (например vorname).");
+      alert("Введите key.");
       return;
     }
-
-    const label_ru = (labelRuEl.value || "").trim();
-    const label_de = (labelDeEl.value || "").trim();
 
     const type = typeEl.value;
-    const required = requiredEl.value === "true";
-    const translate = translateEl.value === "true";
     const fontSize = Number(fontSizeEl.value || 10);
 
-    // если key уже есть — обновляем
-    const existingIndex = fields.findIndex(f => f.key === key);
+    let obj;
 
-    const obj = {
-      key,
-      label_ru: label_ru || undefined,
-      label_de: label_de || undefined,
-      type,
-      required,
-      translate,
-      pdf: {
-        x: lastClick.x,
-        y: lastClick.yTop,
-        fontSize
+    if (type === "boxed_text") {
+      if (currentCells.length === 0) {
+        alert("Для boxed_text сначала запиши клетки через Record cells.");
+        return;
       }
-    };
 
-    // убираем undefined поля для красоты
-    if (obj.label_ru === undefined) delete obj.label_ru;
-    if (obj.label_de === undefined) delete obj.label_de;
+      obj = {
+        key,
+        label_ru: labelRuEl.value.trim() || undefined,
+        label_de: labelDeEl.value.trim() || undefined,
+        type,
+        required: requiredEl.value === "true",
+        translate: translateEl.value === "true",
+        maxLength: Number(maxLengthEl.value || currentCells.length),
+        pdf: {
+          fontSize,
+          cells: currentCells.map(c => ({ x: c.x, y: c.y }))
+        }
+      };
+    } else {
+      if (!lastClick) {
+        alert("Сначала кликни по картинке.");
+        return;
+      }
+
+      obj = {
+        key,
+        label_ru: labelRuEl.value.trim() || undefined,
+        label_de: labelDeEl.value.trim() || undefined,
+        type,
+        required: requiredEl.value === "true",
+        translate: translateEl.value === "true",
+        pdf: {
+          x: lastClick.x,
+          y: lastClick.yTop,
+          fontSize
+        }
+      };
+    }
+
+    cleanUndefined(obj);
+
+    const existingIndex = fields.findIndex(f => f.key === key);
 
     if (existingIndex >= 0) {
       fields[existingIndex] = obj;
@@ -345,10 +617,17 @@
       fields.push(obj);
     }
 
-    // авто переход на следующее поле
     keyEl.value = "";
-    keyEl.focus();
+    labelRuEl.value = "";
+    labelDeEl.value = "";
 
+    if (type === "boxed_text") {
+      currentCells = [];
+      clearCellMarkers();
+      recordingCells = false;
+    }
+
+    keyEl.focus();
     renderAll();
   });
 
@@ -358,27 +637,24 @@
   });
 
   img.addEventListener("click", (e) => {
-    const rect = img.getBoundingClientRect();
+    const click = getPdfClick(e);
 
-    const xView = e.clientX - rect.left;
-    const yView = e.clientY - rect.top;
+    xPdf.textContent = click.x;
+    yTop.textContent = click.yTop;
 
-    const nx = xView / rect.width;
-    const ny = yView / rect.height;
+    if (recordingCells && typeEl.value === "boxed_text") {
+      currentCells.push({
+        x: click.x,
+        y: click.yTop
+      });
 
-    const x = Math.round(nx * PDF_W);
-    const y = Math.round((1 - ny) * PDF_H);
-    const yFromTop = Math.round(ny * PDF_H);
+      addCellMarker(click, currentCells.length - 1);
+      updateRecordStatus();
+      return;
+    }
 
-    xPdf.textContent = x;
-    yPdf.textContent = y;
-    yTop.textContent = yFromTop;
-
-    lastClick = { x, yPdf: y, yTop: yFromTop };
-
-    dot.style.display = "block";
-    dot.style.left = (xView + img.offsetLeft) + "px";
-    dot.style.top = (yView + img.offsetTop) + "px";
+    lastClick = click;
+    setNormalDot(click);
   });
 
   apply();

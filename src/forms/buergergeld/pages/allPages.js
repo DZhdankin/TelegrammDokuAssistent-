@@ -16,7 +16,7 @@ export const sections = [
     fields: [
       "vorname","nachname","geburtsdatum","geburtsname_changed","geburtsname",
       "geburtsort","geburtsland","staatsangehoerigkeit","geschlecht",
-      "strasse","hausnummer","plz","wohnort","postfach",
+      "strasse","hausnummer","plz","wohnort","postfachanschrift","telefon",
       "kein_fester_wohnsitz","wohnhaft_bei"
     ]
   },
@@ -82,14 +82,3 @@ export const sections = [
 
 // плоский список всех полей по порядку
 export const allFields = allPages.flatMap((p) => p.fields);
-console.log("page1 fields:", page1.fields.length);
-console.log("page2 fields:", page2.fields.length);
-console.log("page3 fields:", page3.fields.length);
-console.log("page4 fields:", page4.fields.length);
-console.log("page5 fields:", page5.fields.length);
-console.log("page6 fields:", page6.fields.length);
-console.log("page7 fields:", page7.fields.length);
-console.log("page8 fields:", page8.fields.length);
-console.log("allFields:", allFields.length);
-
-

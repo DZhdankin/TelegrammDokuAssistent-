@@ -91,20 +91,65 @@ function looksLikeStreet(v) {
 
 function isGarbageAnswer(v) {
   const s = norm(v).toLowerCase();
-  const garbage = ["не знаю", "не помню", "нет", "незнаю", "хз", "idk", "n/a"];
+  const garbage = [
+    "не знаю", "не помню", "нет", "незнаю", "хз",
+    "не знаю", "не пам’ятаю", "не памятаю", "ні",
+    "weiß nicht", "weiss nicht", "keine ahnung", "idk", "n/a"
+  ];
   return garbage.includes(s);
+}
+
+const validationMessages = {
+  ru: {
+    required: "Это обязательное поле. Пожалуйста, введите значение.",
+    garbage: "Похоже, это не ответ. Пожалуйста, введите корректное значение 🙂",
+    date: "Введите дату в формате ДД.ММ.ГГГГ (например 23.12.2019).",
+    plz: "PLZ (индекс) должен состоять из 5 цифр. Пример: 36305",
+    iban: "IBAN введён неверно. Пример валидного IBAN: DE89370400440532013000",
+    name: "Похоже, это не имя/фамилия. Проверьте ввод (без цифр).",
+    street: "Введите улицу корректно (например: Soldanstraße).",
+    houseNumber: "Номер дома выглядит неверно. Пример: 7 или 7A"
+    ,
+    childFormsCount: "Укажите количество приложений Anlage Kind числом от 1 до 5."
+  },
+  de: {
+    required: "Dieses Feld ist erforderlich. Bitte geben Sie einen Wert ein.",
+    garbage: "Das sieht nicht wie eine passende Antwort aus. Bitte geben Sie einen korrekten Wert ein 🙂",
+    date: "Bitte geben Sie das Datum im Format TT.MM.JJJJ ein (z. B. 23.12.2019).",
+    plz: "Die PLZ muss aus 5 Ziffern bestehen. Beispiel: 36305",
+    iban: "Die IBAN ist ungültig. Beispiel für eine gültige IBAN: DE89370400440532013000",
+    name: "Das sieht nicht wie ein Name aus. Bitte prüfen Sie die Eingabe (ohne Ziffern).",
+    street: "Bitte geben Sie die Straße korrekt ein (z. B. Soldanstraße).",
+    houseNumber: "Die Hausnummer sieht ungültig aus. Beispiel: 7 oder 7A",
+    childFormsCount: "Bitte geben Sie die Anzahl der Anlage Kind-Formulare als Zahl von 1 bis 5 ein."
+  },
+  uk: {
+    required: "Це обов’язкове поле. Будь ласка, введіть значення.",
+    garbage: "Схоже, це не відповідь. Будь ласка, введіть коректне значення 🙂",
+    date: "Введіть дату у форматі ДД.ММ.РРРР (наприклад 23.12.2019).",
+    plz: "PLZ (індекс) має складатися з 5 цифр. Приклад: 36305",
+    iban: "IBAN введено неправильно. Приклад коректного IBAN: DE89370400440532013000",
+    name: "Схоже, це не ім’я/прізвище. Перевірте введення (без цифр).",
+    street: "Введіть вулицю коректно (наприклад: Soldanstraße).",
+    houseNumber: "Номер будинку виглядає неправильно. Приклад: 7 або 7A",
+    childFormsCount: "Вкажіть кількість додатків Anlage Kind числом від 1 до 5."
+  }
+};
+
+function validationMessage(language, key) {
+  return validationMessages[language]?.[key] || validationMessages.ru[key] || key;
 }
 
 // --------------------
 // Main validation
 // --------------------
-export function validateAnswer(field, value) {
+export function validateAnswer(field, value, language = "ru") {
   const v = norm(value);
 
   // required check
   if (field?.required !== false) {
     if (!v) {
-      return { ok: false, message: "Это обязательное поле. Пожалуйста, введите значение." };
+      return { ok: false, message: validationMessage(language, "required") };
     }
   }
 
@@ -113,16 +158,23 @@ export function validateAnswer(field, value) {
 
   // garbage check (не слишком жёстко)
   if (isGarbageAnswer(v) && field?.required !== false) {
-    return { ok: false, message: "Похоже, это не ответ. Пожалуйста, введите корректное значение 🙂" };
+    return { ok: false, message: validationMessage(language, "garbage") };
   }
 
   const key = String(field?.key || "").toLowerCase();
   const type = String(field?.type || "text").toLowerCase();
 
+  if (key === "attached_child_forms_count") {
+    if (!/^[1-5]$/.test(v)) {
+      return { ok: false, message: validationMessage(language, "childFormsCount") };
+    }
+    return { ok: true };
+  }
+
   // type-based date
   if (type === "date") {
     if (!isValidGermanDate(v)) {
-      return { ok: false, message: "Введите дату в формате ДД.ММ.ГГГГ (например 23.12.2019)." };
+      return { ok: false, message: validationMessage(language, "date") };
     }
     return { ok: true };
   }
@@ -130,7 +182,7 @@ export function validateAnswer(field, value) {
   // key-based strict rules
   if (key === "plz") {
     if (!isValidPlz(v)) {
-      return { ok: false, message: "PLZ (индекс) должен состоять из 5 цифр. Пример: 36305" };
+      return { ok: false, message: validationMessage(language, "plz") };
     }
     return { ok: true };
   }
@@ -139,7 +191,7 @@ export function validateAnswer(field, value) {
     if (!isValidIban(v)) {
       return {
         ok: false,
-        message: "IBAN введён неверно. Пример валидного IBAN: DE89370400440532013000"
+        message: validationMessage(language, "iban")
       };
     }
     return { ok: true };
@@ -147,14 +199,14 @@ export function validateAnswer(field, value) {
 
   if (["vorname", "nachname", "geburtsname", "kontoinhaber"].includes(key)) {
     if (!looksLikeName(v)) {
-      return { ok: false, message: "Похоже, это не имя/фамилия. Проверьте ввод (без цифр)." };
+      return { ok: false, message: validationMessage(language, "name") };
     }
     return { ok: true };
   }
 
   if (key === "strasse") {
     if (!looksLikeStreet(v)) {
-      return { ok: false, message: "Введите улицу корректно (например: Soldanstraße)." };
+      return { ok: false, message: validationMessage(language, "street") };
     }
     return { ok: true };
   }
@@ -162,7 +214,7 @@ export function validateAnswer(field, value) {
   if (key === "hausnummer") {
     // дом может быть: 7, 7a, 12-14
     if (!/^[0-9]{1,5}[a-zA-Z]?(?:[-/][0-9]{1,5})?$/.test(v)) {
-      return { ok: false, message: "Номер дома выглядит неверно. Пример: 7 или 7A" };
+      return { ok: false, message: validationMessage(language, "houseNumber") };
     }
     return { ok: true };
   }

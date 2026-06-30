@@ -1,0 +1,30 @@
+export const ankPage3 = {
+  page: 5,
+  title: "Anlage Kind — Seite 3/4",
+
+  fields: [
+    { key: "adult_child_has_disability_before_25", type: "choice", required: false, translate: false, dependsOn: { key: "child_is_adult_or_soon_18", value: "yes" }, label_ru: "У ребёнка есть инвалидность, которая наступила до 25 лет?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 454, y: 104, fontSize: 10, mark: "X" }, no: { x: 510, y: 104, fontSize: 10, mark: "X" } } },
+
+    { key: "child_kindergeld_already_applied_or_received", type: "choice", required: true, translate: false, label_ru: "На этого ребёнка уже подавали заявление или получали Kindergeld?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 88, y: 210, fontSize: 10, mark: "X" }, no: { x: 294, y: 210, fontSize: 10, mark: "X" } } },
+    { key: "previous_kindergeld_person_name", type: "text", required: false, translate: true, dependsOn: { key: "child_kindergeld_already_applied_or_received", value: "yes" }, label_ru: "Кто подавал заявление или получал Kindergeld?", pdf: { x: 84, y: 230, fontSize: 10 } },
+    { key: "previous_kindergeld_person_birth_date", type: "date", required: false, translate: false, dependsOn: { key: "child_kindergeld_already_applied_or_received", value: "yes" }, label_ru: "Дата рождения этой Person:", pdf: { x: 380, y: 230, fontSize: 10 } },
+    { key: "previous_kindergeld_period", type: "text", required: false, translate: false, dependsOn: { key: "child_kindergeld_already_applied_or_received", value: "yes" }, label_ru: "Период получения / заявления Kindergeld:", pdf: { x: 455, y: 230, fontSize: 10 } },
+    { key: "previous_kindergeld_familienkasse_address", type: "text", required: false, translate: false, dependsOn: { key: "child_kindergeld_already_applied_or_received", value: "yes" }, label_ru: "Familienkasse и адрес:", pdf: { x: 84, y: 256, fontSize: 10 } },
+    { key: "previous_kindergeld_number", type: "text", required: false, translate: false, dependsOn: { key: "child_kindergeld_already_applied_or_received", value: "yes" }, label_ru: "Kindergeldnummer, если известен:", pdf: { x: 455, y: 256, fontSize: 10 } },
+
+    { key: "public_service_employment_exists", type: "choice", required: true, translate: false, label_ru: "Вы или Person из пункта 2 работаете/работали в öffentlichen Dienst?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 88, y: 381, fontSize: 10, mark: "X" }, no: { x: 294, y: 381, fontSize: 10, mark: "X" } } },
+    { key: "public_service_federal_institution", type: "choice", required: false, translate: false, dependsOn: { key: "public_service_employment_exists", value: "yes" }, label_ru: "Работа выполняется в учреждении федерального уровня?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 454, y: 398, fontSize: 10, mark: "X" }, no: { x: 509, y: 398, fontSize: 10, mark: "X" } } },
+    { key: "public_service_ba_or_jobcenter", type: "choice", required: false, translate: false, dependsOn: { key: "public_service_employment_exists", value: "yes" }, label_ru: "Работа выполняется в Bundesagentur für Arbeit или Jobcenter?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 454, y: 420, fontSize: 10, mark: "X" }, no: { x: 509, y: 420, fontSize: 10, mark: "X" } } },
+    { key: "public_service_person_name", type: "text", required: false, translate: true, dependsOn: { key: "public_service_employment_exists", value: "yes" }, label_ru: "Person в öffentlichen Dienst: фамилия и имя:", pdf: { x: 83, y: 440, fontSize: 10 } },
+    { key: "public_service_person_birth_date", type: "date", required: false, translate: false, dependsOn: { key: "public_service_employment_exists", value: "yes" }, label_ru: "Person в öffentlichen Dienst: дата рождения:", pdf: { x: 454, y: 440, fontSize: 10 } },
+
+    { key: "foreign_child_benefit_claim_exists", type: "choice", required: true, translate: false, label_ru: "Было или есть право на выплаты на ребёнка из-за границы или международной организации?", options: [{ value: "yes", label_ru: "Да" }, { value: "no", label_ru: "Нет" }], pdfChoices: { yes: { x: 88, y: 565, fontSize: 10, mark: "X" }, no: { x: 292, y: 565, fontSize: 10, mark: "X" } } },
+    { key: "foreign_benefit_person_name", type: "text", required: false, translate: true, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Кто получает / получал иностранную выплату?", pdf: { x: 80, y: 584, fontSize: 10 } },
+    { key: "foreign_benefit_person_birth_date", type: "date", required: false, translate: false, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Дата рождения получателя выплаты:", pdf: { x: 453, y: 584, fontSize: 10 } },
+    { key: "foreign_benefit_name", type: "text", required: false, translate: true, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Название выплаты:", pdf: { x: 82, y: 610, fontSize: 10 } },
+    { key: "foreign_benefit_monthly_amount", type: "text", required: false, translate: false, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Ежемесячная сумма выплаты в евро:", pdf: { x: 364, y: 610, fontSize: 10 } },
+    { key: "foreign_benefit_period", type: "text", required: false, translate: false, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Период выплаты:", pdf: { x: 456, y: 610, fontSize: 10 } },
+    { key: "foreign_benefit_provider_address", type: "text", required: false, translate: false, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Организация/ведомство, которое выплачивает, и адрес:", pdf: { x: 82, y: 635, fontSize: 10 } },
+    { key: "foreign_benefit_reference_number", type: "text", required: false, translate: false, dependsOn: { key: "foreign_child_benefit_claim_exists", value: "yes" }, label_ru: "Aktenzeichen / номер дела:", pdf: { x: 455, y: 635, fontSize: 10 } }
+  ]
+};
